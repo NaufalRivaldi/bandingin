@@ -1,3 +1,92 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+```bash
+composer dev          # all dev processes (php artisan dev: server, queue, logs, vite)
+composer test         # clears config, then php artisan test
+php artisan test --compact --filter=testName   # single test / filtered run
+php artisan pail      # tail application logs
+vendor/bin/pint --dirty --format agent          # required after editing any PHP file
+npm run build         # production asset build (npm run dev for the Vite watcher alone)
+```
+
+`composer setup` does a first-time install (deps, `.env`, key, migrate, npm build).
+
+## State of the repository
+
+This is an unmodified Laravel 13 skeleton on PHP 8.5 — no domain code exists yet. `app/` holds only the base `Controller`, the default `User` model, and `AppServiceProvider`; `routes/web.php` has a single closure returning the `welcome` view. Anything you build will be the first of its kind here, so there are no sibling files to copy conventions from. Establish patterns deliberately and record them with the Boost `record-rule` MCP tool (see below).
+
+## Notable configuration
+
+- **SQLite by default**, at `database/database.sqlite`. Cache, queue, and session all use the `database` driver, so their tables come from the three baseline migrations. Tests override this to an in-memory SQLite database (`phpunit.xml`).
+- **`RefreshDatabase` is commented out** in `tests/Pest.php`. The moment a test touches the database, uncomment it rather than adding the trait per-file.
+- **Exceptions render as JSON** for `api/*` paths and `expectsJson()` requests (`bootstrap/app.php`), even though no API routes file exists yet — add one via `withRouting(api: ...)` if you need it.
+- **Health check** is exposed at `/up`.
+- Served locally by Laravel Herd. Use the Boost `get-absolute-url` tool rather than guessing the host.
+
+## Code standards
+
+Non-negotiable for every PHP file written here. Where a rule is machine-checkable, the tool is the source of truth — don't argue with it.
+
+### PSR-12 (style)
+
+- Pint enforces PSR-12 with the `laravel` preset. Run `vendor/bin/pint --dirty --format agent` after editing any PHP file; never hand-format to fight it.
+- What Pint won't catch, you own: `declare(strict_types=1);` is **not** in the Laravel preset — add it to every new class file, and keep it there.
+- One class per file, filename matching the class, `StudlyCase` classes, `camelCase` methods, `SCREAMING_SNAKE_CASE` constants, `TitleCase` enum cases.
+
+### Clean Code
+
+- Names state intent: `isEligibleForRefund()`, not `check()`. Booleans read as predicates (`is`, `has`, `can`).
+- Functions do one thing at one level of abstraction. A controller action that validates, computes, persists, and notifies is four things — extract three of them.
+- Guard clauses over nested conditionals; return early. No `else` after a `return`.
+- No flag parameters (`process($order, true)`) — split into two named methods.
+- Comments explain *why*, never *what*. If a comment restates the code, delete it and rename the thing instead. Per the PHP rules below, prefer PHPDoc over inline comments.
+- No dead code, no commented-out blocks, no speculative abstraction for a second use case that doesn't exist yet.
+
+### SOLID
+
+- **SRP** — Controllers coordinate HTTP only: resolve input, delegate, return a response. Business logic lives in Actions/Services; query logic in the model, a scope, or a query builder class. Models are persistence + relationships + casts, not a dumping ground.
+- **OCP** — Extend behaviour by adding a class (a new Action, a new pipeline stage, a new listener), not by adding another branch to a growing `match`/`switch`.
+- **LSP** — A subclass or contract implementation must not narrow accepted input or throw where the parent doesn't. Prefer composition over inheritance; the only base classes to extend are the framework's.
+- **ISP** — Small, purpose-named interfaces (`SendsInvoices`), not a `ServiceInterface` with twelve methods. Don't add an interface until there is a real second implementation or a real test seam.
+- **DIP** — Type-hint contracts, constructor-inject them (with promotion), and bind concretes in `AppServiceProvider`. Never `new` a dependency that has side effects; never reach for a facade inside a domain class where injection is possible.
+
+### Laravel best practice
+
+- **Do it the framework's way first.** Reach for a custom abstraction only after the built-in (Form Request, Policy, Resource, Job, Event, Notification, Scope, Cast, Rule) genuinely doesn't fit.
+- **Validation** lives in Form Requests, not inline `$request->validate()` in the controller, once a rule set has more than a couple of fields or is reused.
+- **Authorization** lives in Policies + `authorize()`/`can` middleware. No `if ($user->role === 'admin')` scattered through actions.
+- **Never trust mass assignment.** Pass `$request->validated()`, not `$request->all()`. Keep `$fillable`/`$guarded` deliberate.
+- **N+1 is a bug, not a nit.** Eager-load with `with()`/`load()`, use `withCount()`, and prefer `chunkById()`/`lazy()`/`cursor()` over `all()` for large sets. Never query inside a loop (including inside a Blade loop).
+- **Push work to the database:** aggregates, `exists()`, `whereHas`, pagination. Don't pull collections into PHP to filter or count them.
+- **Anything slow or third-party is a queued Job** — mail, webhooks, imports, image work. Make jobs idempotent and set `$tries`/`backoff`.
+- **Wrap multi-write operations** in `DB::transaction()`, and dispatch side effects after commit (`afterCommit`), not inside the transaction.
+- **Config over env:** call `env()` only inside `config/*.php`; everywhere else use `config()`, so config caching doesn't blank your values.
+- **Routes** are named and reference controllers; generate URLs with `route()`. No closures with logic in `routes/web.php`.
+- **APIs** return Eloquent API Resources, versioned, with the JSON exception rendering already wired in `bootstrap/app.php`.
+- **Every behaviour ships with a Pest test** — feature tests by default, factories for data. See the Pest rules below.
+
+### Design patterns
+
+Use them where they reduce complexity; a pattern applied to a two-line problem is itself the problem.
+
+- **Action / Single-purpose class** — the default home for a use case (`app/Actions/CreateInvoice.php`, one public `handle()`). Prefer this over a fat `Service` god-class.
+- **Repository** — only when you need to swap or fake the persistence layer. Eloquent is already a data-access layer; wrapping it "for testability" alone is a net loss here.
+- **Strategy** — for interchangeable algorithms (payment gateways, pricing rules): an interface plus implementations, selected by a factory or container binding.
+- **Observer / Events & Listeners** — for decoupled side effects. Keep model observers to persistence concerns; use domain events for anything a reader would be surprised to find in a model hook.
+- **Pipeline** — for ordered, composable steps (filters, request processing) instead of chained conditionals.
+- **Factory / Builder** — for complex object assembly; model factories are the testing equivalent and are mandatory for test data.
+- **DTOs** — typed, readonly objects to move data across boundaries rather than untyped arrays, once the array shape has more than a few keys.
+
+## Agent configuration
+
+- Everything inside the `<laravel-boost-guidelines>` block below is **generated**, and mirrored verbatim into `AGENTS.md` — `composer update` runs `boost:update`, which rewrites both. Put project-specific guidance above that block (like this section) or it will be overwritten; mirror it into `AGENTS.md` if non-Claude agents need it too.
+- Skills are duplicated into `.claude/skills/` and `.cursor/skills/` by Boost (`boost.json` lists which). Edit skills through Boost, not by hand in one copy.
+- `.ai/rules/` does not exist yet; the generated guidelines below reference it. It appears once you start recording rules with `record-rule`.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
@@ -151,3 +240,42 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Do NOT delete tests without approval.
 
 </laravel-boost-guidelines>
+
+<!-- code-review-graph MCP tools -->
+## MCP Tools: code-review-graph
+
+**IMPORTANT: This project has a knowledge graph. ALWAYS use the
+code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
+the codebase.** The graph is faster, cheaper (fewer tokens), and gives
+you structural context (callers, dependents, test coverage) that file
+scanning cannot.
+
+### When to use graph tools FIRST
+
+- **Exploring code**: `semantic_search_nodes_tool` or `query_graph_tool` instead of Grep
+- **Understanding impact**: `get_impact_radius_tool` instead of manually tracing imports
+- **Code review**: `detect_changes_tool` + `get_review_context_tool` instead of reading entire files
+- **Finding relationships**: `query_graph_tool` with callers_of/callees_of/imports_of/tests_for
+- **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
+
+Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
+
+### Key Tools
+
+| Tool | Use when |
+| ------ | ---------- |
+| `detect_changes_tool` | Reviewing code changes — gives risk-scored analysis |
+| `get_review_context_tool` | Need source snippets for review — token-efficient |
+| `get_impact_radius_tool` | Understanding blast radius of a change |
+| `get_affected_flows_tool` | Finding which execution paths are impacted |
+| `query_graph_tool` | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes_tool` | Finding functions/classes by name or keyword |
+| `get_architecture_overview_tool` | Understanding high-level codebase structure |
+| `refactor_tool` | Planning renames, finding dead code |
+
+### Workflow
+
+1. The graph auto-updates on file changes (via hooks).
+2. Use `detect_changes_tool` for code review.
+3. Use `get_affected_flows_tool` to understand impact.
+4. Use `query_graph_tool` pattern="tests_for" to check coverage.
