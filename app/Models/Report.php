@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ReportStatus;
 use App\Enums\ReportType;
 use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,7 @@ class Report extends Model
 
     protected $fillable = [
         'type',
+        'status',
         'subject',
         'email',
         'store',
@@ -32,6 +34,7 @@ class Report extends Model
     {
         return [
             'type' => ReportType::class,
+            'status' => ReportStatus::class,
         ];
     }
 }

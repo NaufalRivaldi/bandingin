@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ReportStatus;
 use App\Enums\ReportType;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,6 +21,7 @@ class ReportFactory extends Factory
     {
         return [
             'type' => ReportType::Hp,
+            'status' => null,
             'subject' => 'POCO F7 Pro 12/256 GB',
             'email' => fake()->safeEmail(),
             'store' => null,
@@ -27,6 +29,11 @@ class ReportFactory extends Factory
             'product_url' => null,
             'note' => fake()->sentence(),
         ];
+    }
+
+    public function processed(): self
+    {
+        return $this->state(fn (): array => ['status' => ReportStatus::Diproses]);
     }
 
     public function priceReport(): self
