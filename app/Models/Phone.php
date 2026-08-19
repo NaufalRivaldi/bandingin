@@ -56,6 +56,17 @@ class Phone extends Model
         return $this->hasMany(PhoneListing::class);
     }
 
+    /** @return HasMany<PhoneVariant, $this> */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(PhoneVariant::class)->orderBy('sort');
+    }
+
+    public function defaultVariant(): ?PhoneVariant
+    {
+        return $this->variants->firstWhere('is_default', true);
+    }
+
     /** @param  Builder<$this>  $query */
     public function scopePublished(Builder $query): void
     {
