@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Filament\Resources\Brands\BrandResource;
+use App\Filament\Resources\PhoneListings\PhoneListingResource;
 use App\Filament\Resources\Phones\PhoneResource;
 use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
 use App\Filament\Resources\Stores\StoreResource;
@@ -25,6 +26,7 @@ function creatableResources(): array
         'stores' => [StoreResource::class],
         'brands' => [BrandResource::class],
         'phones' => [PhoneResource::class],
+        'phone listings' => [PhoneListingResource::class],
     ];
 }
 
