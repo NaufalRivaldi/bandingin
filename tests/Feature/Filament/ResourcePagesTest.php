@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Brands\BrandResource;
+use App\Filament\Resources\Faqs\FaqResource;
+use App\Filament\Resources\FeaturedMatchups\FeaturedMatchupResource;
 use App\Filament\Resources\PhoneListings\PhoneListingResource;
 use App\Filament\Resources\Phones\PhoneResource;
 use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
@@ -29,6 +31,8 @@ function creatableResources(): array
         'phones' => [PhoneResource::class],
         'phone listings' => [PhoneListingResource::class],
         'articles' => [ArticleResource::class],
+        'faqs' => [FaqResource::class],
+        'featured matchups' => [FeaturedMatchupResource::class],
     ];
 }
 
