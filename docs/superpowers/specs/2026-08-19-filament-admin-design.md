@@ -17,7 +17,7 @@ This project runs **Laravel 13.25** and **Livewire 4.4** on **PHP 8.4**. Filamen
 ### Decisions made during brainstorming
 
 1. **Access** — login only, registration disabled. Any `users` row may sign in. No `is_admin` column and no permissions package: there is exactly one role today.
-2. **Account creation** — via `php artisan tinker`, not a custom command.
+2. **Account creation** — no custom command. Filament ships `php artisan make:filament-user`, which covers this with no code to write; `php artisan tinker` remains available for scripted cases.
 3. **Phone editing** — the 19 specs render inline on the phone form (they always all exist); variants and listings are relation managers (variable count, independently edited).
 4. **Scope** — all 11 resources in this part.
 5. **Article comparison block** — a RichEditor custom block storing two phone IDs, rendered from live phone data so it cannot go stale.
@@ -33,10 +33,10 @@ A single panel at `/admin`, registered by `app/Providers/Filament/AdminPanelProv
 - Sidebar navigation groups: **Katalog**, **Konten**, **Operasional**.
 - `User` implements nothing extra; every user row is an admin. When a second role appears, introduce `FilamentUser::canAccessPanel()` then — not now.
 
-Creating the first account:
+Creating the first account uses Filament's own command — no project code required:
 
 ```bash
-php artisan tinker --execute 'App\Models\User::create(["name" => "Admin", "email" => "admin@bandingin.test", "password" => bcrypt("secret")]);'
+php artisan make:filament-user
 ```
 
 ## Resources
