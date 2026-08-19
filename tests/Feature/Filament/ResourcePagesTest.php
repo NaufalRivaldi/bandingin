@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Brands\BrandResource;
 use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
 use App\Filament\Resources\Stores\StoreResource;
 use App\Models\User;
@@ -21,6 +22,7 @@ function creatableResources(): array
     return [
         'spec definitions' => [SpecDefinitionResource::class],
         'stores' => [StoreResource::class],
+        'brands' => [BrandResource::class],
     ];
 }
 
