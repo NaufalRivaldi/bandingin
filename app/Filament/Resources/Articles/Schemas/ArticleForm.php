@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Articles\Schemas;
 
 use App\Enums\ArticleCategory;
+use App\Filament\Forms\Components\RichEditor\RichContentCustomBlocks\PhoneComparisonBlock;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -50,6 +51,9 @@ class ArticleForm
                 RichEditor::make('body')
                     ->label('Isi artikel')
                     ->required()
+                    ->customBlocks([
+                        PhoneComparisonBlock::class,
+                    ])
                     ->columnSpanFull(),
             ]);
     }
