@@ -6,10 +6,13 @@ use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Brands\BrandResource;
 use App\Filament\Resources\Faqs\FaqResource;
 use App\Filament\Resources\FeaturedMatchups\FeaturedMatchupResource;
+use App\Filament\Resources\NewsletterSubscribers\NewsletterSubscriberResource;
 use App\Filament\Resources\PhoneListings\PhoneListingResource;
 use App\Filament\Resources\Phones\PhoneResource;
+use App\Filament\Resources\Reports\ReportResource;
 use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
 use App\Filament\Resources\Stores\StoreResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -17,8 +20,10 @@ beforeEach(function (): void {
 });
 
 /**
- * Every resource that has a create page. Each dataset row is a single-element
- * array so Pest passes one class per test rather than spreading them as args.
+ * Resources whose records are created inside the panel.
+ *
+ * Each dataset row is a single-element array so Pest passes one class per
+ * test rather than spreading them all as arguments to one test.
  *
  * @return array<string, array{class-string}>
  */
@@ -33,13 +38,22 @@ function creatableResources(): array
         'articles' => [ArticleResource::class],
         'faqs' => [FaqResource::class],
         'featured matchups' => [FeaturedMatchupResource::class],
+        'users' => [UserResource::class],
     ];
 }
 
-/** @return array<string, array{class-string}> */
+/**
+ * Every resource, including the two fed by the public site rather than the
+ * panel — reports arrive from /lapor and subscribers from the footer form.
+ *
+ * @return array<string, array{class-string}>
+ */
 function listableResources(): array
 {
-    return creatableResources();
+    return creatableResources() + [
+        'reports' => [ReportResource::class],
+        'newsletter subscribers' => [NewsletterSubscriberResource::class],
+    ];
 }
 
 it('renders the list page', function (string $resource): void {
@@ -49,3 +63,11 @@ it('renders the list page', function (string $resource): void {
 it('renders the create page', function (string $resource): void {
     $this->get($resource::getUrl('create'))->assertSuccessful();
 })->with(creatableResources());
+
+it('covers every registered resource', function (): void {
+    $registered = collect(Filament\Facades\Filament::getPanel('admin')->getResources());
+    $covered = collect(listableResources())->flatten();
+
+    expect($covered->sort()->values()->all())
+        ->toBe($registered->sort()->values()->all());
+});
