@@ -1,0 +1,158 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire;
+
+use App\Actions\CompareDuel;
+use App\Data\DuelResult;
+use App\Data\Phone;
+use App\Support\PhoneCatalog;
+use App\Support\SellerPricing;
+use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+
+#[Title('Bandingkan HP — Bandingin.id')]
+class PerbandinganPage extends Component
+{
+    #[Url]
+    public string $left = 'a56';
+
+    #[Url]
+    public string $right = 'note14pro';
+
+    /** Which picker dropdown is open: "left", "right", or null when both are closed. */
+    public ?string $open = null;
+
+    public string $leftQuery = '';
+
+    public string $rightQuery = '';
+
+    public bool $onlyDifferences = false;
+
+    /** @var list<array{left: string, right: string, label: string}> */
+    public const array RELATED = [
+        ['left' => 'x7pro', 'right' => 'note14pro', 'label' => 'POCO X7 Pro vs Redmi Note 14 Pro'],
+        ['left' => 'a56', 'right' => 'r13pp', 'label' => 'Galaxy A56 vs realme 13 Pro+'],
+        ['left' => 'ip16', 'right' => 's25', 'label' => 'iPhone 16 vs Galaxy S25'],
+        ['left' => 'note40pro', 'right' => 'note14pro', 'label' => 'Infinix Note 40 Pro vs Redmi Note 14 Pro'],
+    ];
+
+    #[Computed]
+    public function leftPhone(): Phone
+    {
+        return PhoneCatalog::findOrFirst($this->left);
+    }
+
+    #[Computed]
+    public function rightPhone(): Phone
+    {
+        return PhoneCatalog::findOrFirst($this->right);
+    }
+
+    #[Computed]
+    public function pairTitle(): string
+    {
+        return $this->leftPhone()->name.' vs '.$this->rightPhone()->name;
+    }
+
+    #[Computed]
+    public function duel(): DuelResult
+    {
+        return app(CompareDuel::class)->handle(
+            $this->leftPhone(),
+            $this->rightPhone(),
+            CompareDuel::FULL_GROUPS,
+            $this->onlyDifferences,
+        );
+    }
+
+    /**
+     * One price panel per phone, each with its own marketplace listings.
+     *
+     * @return list<array{phone: Phone, lowest: string, sellers: list<array{store: string, note: string, price: string, tag: string}>}>
+     */
+    #[Computed]
+    public function priceCards(): array
+    {
+        return array_map(
+            static fn (Phone $phone): array => [
+                'phone' => $phone,
+                'lowest' => SellerPricing::lowestPriceLabel($phone),
+                'sellers' => SellerPricing::compact($phone->price),
+            ],
+            [$this->leftPhone(), $this->rightPhone()],
+        );
+    }
+
+    /** @return list<Phone> */
+    #[Computed]
+    public function leftSuggestions(): array
+    {
+        return PhoneCatalog::search($this->leftQuery);
+    }
+
+    /** @return list<Phone> */
+    #[Computed]
+    public function rightSuggestions(): array
+    {
+        return PhoneCatalog::search($this->rightQuery);
+    }
+
+    public function openPicker(string $side): void
+    {
+        $this->open = $this->open === $side ? null : $side;
+
+        $side === 'left'
+            ? $this->leftQuery = ''
+            : $this->rightQuery = '';
+    }
+
+    public function closePickers(): void
+    {
+        $this->open = null;
+    }
+
+    public function pick(string $side, string $id): void
+    {
+        $side === 'left'
+            ? $this->left = $id
+            : $this->right = $id;
+
+        $this->closePickers();
+    }
+
+    public function swap(): void
+    {
+        [$this->left, $this->right] = [$this->right, $this->left];
+
+        $this->closePickers();
+    }
+
+    public function setMatchup(string $left, string $right): void
+    {
+        $this->left = $left;
+        $this->right = $right;
+
+        $this->closePickers();
+    }
+
+    public function toggleOnlyDifferences(): void
+    {
+        $this->onlyDifferences = ! $this->onlyDifferences;
+    }
+
+    public function render(): View
+    {
+        return view('livewire.perbandingan-page', [
+            'related' => self::RELATED,
+            'specCount' => array_sum(array_map(
+                static fn (array $labels): int => count($labels),
+                CompareDuel::FULL_GROUPS,
+            )),
+        ]);
+    }
+}

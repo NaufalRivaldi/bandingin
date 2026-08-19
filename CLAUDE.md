@@ -83,9 +83,9 @@ Use them where they reduce complexity; a pattern applied to a two-line problem i
 
 ## Agent configuration
 
-- Everything inside the `<laravel-boost-guidelines>` block below is **generated**, and mirrored verbatim into `AGENTS.md` — `composer update` runs `boost:update`, which rewrites both. Put project-specific guidance above that block (like this section) or it will be overwritten; mirror it into `AGENTS.md` if non-Claude agents need it too.
+- Everything inside the generated guidelines block below is **generated**, and mirrored verbatim into `AGENTS.md` — `composer update` runs `boost:update`, which rewrites both. Put project-specific guidance above that block (like this section) or it will be overwritten; mirror it into `AGENTS.md` if non-Claude agents need it too. Do not write the block's opening tag name in prose up here: `boost:update` matches on it and will truncate this section.
 - Skills are duplicated into `.claude/skills/` and `.cursor/skills/` by Boost (`boost.json` lists which). Edit skills through Boost, not by hand in one copy.
-- `.ai/rules/` does not exist yet; the generated guidelines below reference it. It appears once you start recording rules with `record-rule`.
+- `.ai/rules/` holds committed, area-grouped rules recorded with the Boost `record-rule` tool. Read the ones matching the paths you touch before editing.
 
 <laravel-boost-guidelines>
 === foundation rules ===
@@ -96,7 +96,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 ## Foundational Context
 
-This application is a Laravel application running on PHP 8.5. You are an expert with the Laravel ecosystem. Always use the APIs that match the installed major version of each package — do not assume a version.
+This application is a Laravel application running on PHP 8.4. You are an expert with the Laravel ecosystem. Always use the APIs that match the installed major version of each package — do not assume a version.
 
 Before relying on a package's API, confirm its installed version:
 - PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
@@ -193,6 +193,13 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
 
+=== herd rules ===
+
+# Laravel Herd
+
+- The application is served by Laravel Herd at `https?://[kebab-case-project-dir].test`. Use the `get-absolute-url` tool to generate valid URLs. Never run commands to serve the site. It is always available.
+- Use the `herd` CLI to manage services, PHP versions, and sites (e.g. `herd sites`, `herd services:start <service>`, `herd php:list`). Run `herd list` to discover all available commands.
+
 === laravel/core rules ===
 
 # Do Things the Laravel Way
@@ -222,6 +229,14 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Vite Error
 
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+
+=== livewire/core rules ===
+
+# Livewire
+
+- Livewire allow to build dynamic, reactive interfaces in PHP without writing JavaScript.
+- You can use Alpine.js for client-side interactions instead of JavaScript frameworks.
+- Keep state server-side so the UI reflects it. Validate and authorize in actions as you would in HTTP requests.
 
 === pint/core rules ===
 
