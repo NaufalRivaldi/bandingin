@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Phones\Schemas;
 
+use App\Models\SpecDefinition;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
@@ -89,6 +90,35 @@ class PhoneForm
                             ->simple(TextInput::make('item')->required())
                             ->defaultItems(1)
                             ->reorderable(),
+                    ]),
+                Section::make('Spesifikasi')
+                    ->description('Semua baris spesifikasi untuk HP ini.')
+                    ->schema([
+                        Repeater::make('specs')
+                            ->hiddenLabel()
+                            ->relationship('specs')
+                            ->schema([
+                                Select::make('spec_definition_id')
+                                    ->label('Spesifikasi')
+                                    ->options(fn (): array => SpecDefinition::orderBy('sort')
+                                        ->pluck('label', 'id')
+                                        ->all())
+                                    ->required()
+                                    ->distinct()
+                                    ->searchable(),
+                                TextInput::make('display_value')
+                                    ->label('Nilai tampil')
+                                    ->required()
+                                    ->helperText('Persis seperti yang dibaca pengunjung, misal "5.000 mAh".'),
+                                TextInput::make('comparable_value')
+                                    ->label('Nilai pembanding')
+                                    ->numeric()
+                                    ->required()
+                                    ->helperText('Selalu "makin tinggi makin menang". Metrik terbalik ditulis negatif — 198 g ditulis -198.'),
+                            ])
+                            ->columns(3)
+                            ->addActionLabel('Tambah spesifikasi')
+                            ->defaultItems(0),
                     ]),
             ]);
     }
