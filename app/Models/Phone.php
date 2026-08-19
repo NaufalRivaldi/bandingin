@@ -50,6 +50,12 @@ class Phone extends Model
         return $this->hasMany(PhoneSpec::class);
     }
 
+    /** @return HasMany<PhoneListing, $this> */
+    public function listings(): HasMany
+    {
+        return $this->hasMany(PhoneListing::class);
+    }
+
     /** @param  Builder<$this>  $query */
     public function scopePublished(Builder $query): void
     {
