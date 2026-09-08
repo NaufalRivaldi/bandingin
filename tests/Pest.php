@@ -1,5 +1,13 @@
 <?php
 
+use Database\Seeders\ArticleSeeder;
+use Database\Seeders\BrandHighlightSeeder;
+use Database\Seeders\BrandSeeder;
+use Database\Seeders\FaqSeeder;
+use Database\Seeders\FeaturedMatchupSeeder;
+use Database\Seeders\PhoneSeeder;
+use Database\Seeders\SpecDefinitionSeeder;
+use Database\Seeders\StoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +55,23 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Frontend pages read the database, so page tests need the catalogue present.
+ * This runs the same seeders as production, which keeps assertions that name
+ * real records (a56, "lists the whole catalogue") meaningful.
+ */
+function seedCatalog(): void
+{
+    test()->seed([
+        SpecDefinitionSeeder::class,
+        StoreSeeder::class,
+        BrandSeeder::class,
+        PhoneSeeder::class,
+        BrandHighlightSeeder::class,
+        ArticleSeeder::class,
+        FaqSeeder::class,
+        FeaturedMatchupSeeder::class,
+    ]);
 }

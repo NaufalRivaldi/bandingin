@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Money\Rupiah;
 use Database\Factories\PhoneVariantFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,5 +35,10 @@ class PhoneVariant extends Model
         return [
             'is_default' => 'boolean',
         ];
+    }
+
+    public function formattedPrice(): string
+    {
+        return Rupiah::format($this->price);
     }
 }

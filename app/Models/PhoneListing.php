@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Money\Rupiah;
 use App\Observers\PhoneListingObserver;
 use Database\Factories\PhoneListingFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -43,5 +44,10 @@ class PhoneListing extends Model
     public function snapshots(): HasMany
     {
         return $this->hasMany(PriceSnapshot::class);
+    }
+
+    public function formattedPrice(): string
+    {
+        return Rupiah::format($this->price);
     }
 }

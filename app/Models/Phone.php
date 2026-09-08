@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Money\Rupiah;
 use Database\Factories\PhoneFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -65,6 +66,53 @@ class Phone extends Model
     public function defaultVariant(): ?PhoneVariant
     {
         return $this->variants->firstWhere('is_default', true);
+    }
+
+    /**
+     * The five category scores, keyed by the labels the design prints.
+     *
+     * @return array<string, int>
+     */
+    public function scores(): array
+    {
+        return [
+            'Performa' => $this->score_performa,
+            'Layar' => $this->score_layar,
+            'Kamera' => $this->score_kamera,
+            'Baterai' => $this->score_baterai,
+            'Nilai per Rupiah' => $this->score_nilai,
+        ];
+    }
+
+    public function averageScore(): int
+    {
+        $scores = $this->scores();
+
+        return (int) round(array_sum($scores) / count($scores));
+    }
+
+    public function formattedPrice(): string
+    {
+        return Rupiah::format($this->price);
+    }
+
+    /** Reads the loaded specs relation — eager-load specs.definition before calling. */
+    public function display(string $key): string
+    {
+        return $this->specFor($key)?->display_value ?? '—';
+    }
+
+    /** Reads the loaded specs relation — eager-load specs.definition before calling. */
+    public function comparable(string $key): int
+    {
+        return $this->specFor($key)?->comparable_value ?? 0;
+    }
+
+    private function specFor(string $key): ?PhoneSpec
+    {
+        return $this->specs->first(
+            static fn (PhoneSpec $spec): bool => $spec->definition?->key === $key,
+        );
     }
 
     /** @param  Builder<$this>  $query */
