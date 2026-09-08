@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 class SpecDefinitionSeeder extends Seeder
 {
     /**
-     * Keys match App\Support\PhoneCatalog's spec array exactly; the loader in
+     * Keys match PhoneSeeder::PHONES spec arrays exactly; the loader in
      * PhoneSeeder resolves them by key, so renaming one breaks that seeder.
      *
      * @var list<array{key: string, label: string, group: string}>

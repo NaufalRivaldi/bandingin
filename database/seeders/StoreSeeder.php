@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class StoreSeeder extends Seeder
 {
     /**
-     * Names match App\Support\SellerPricing::detailed(); PhoneSeeder resolves
+     * Names match PhoneSeeder::SELLER_OFFSETS; PhoneSeeder resolves
      * stores by name when it ports today's listing prices.
      *
      * @var list<array{name: string, is_official: bool}>

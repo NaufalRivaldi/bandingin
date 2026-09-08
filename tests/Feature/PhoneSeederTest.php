@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
+/** The catalogue inlined in PhoneSeeder. */
+const CATALOGUE_SIZE = 12;
+
 use App\Models\Brand;
 use App\Models\Phone;
 use App\Models\PhoneListing;
-use App\Support\PhoneCatalog;
-use App\Support\SellerPricing;
 use Database\Seeders\BrandHighlightSeeder;
 use Database\Seeders\BrandSeeder;
 use Database\Seeders\PhoneSeeder;
@@ -55,15 +56,14 @@ it('links each phone to its brand', function (): void {
 
 it('gives every catalogue phone four listings matching the old offsets', function (): void {
     $phone = Phone::where('slug', 'a56')->sole();
-    $expected = SellerPricing::detailed(5_499_000);
-
+    // The distributor row is always the cheapest, at 520_000 below list.
     expect($phone->listings()->count())->toBe(4)
-        ->and($phone->listings()->min('price'))->toBe(SellerPricing::lowestPrice(5_499_000));
+        ->and($phone->listings()->min('price'))->toBe(5_499_000 - 520_000);
 
     $distributor = $phone->listings()->whereRelation('store', 'name', 'Toko distributor')->sole();
 
     expect($distributor->warranty_tag)->toBe('Non-resmi')
-        ->and($expected)->toHaveCount(4);
+        ->and($distributor->price)->toBe(5_499_000 - 520_000);
 });
 
 it('gives every catalogue phone three variants with one default', function (): void {
@@ -79,7 +79,7 @@ it('parses the release label into a sortable date', function (): void {
 });
 
 it('records a price snapshot for every seeded listing', function (): void {
-    expect(PhoneListing::count())->toBe(count(PhoneCatalog::all()) * 4);
+    expect(PhoneListing::count())->toBe(CATALOGUE_SIZE * 4);
 
     $listing = PhoneListing::with('snapshots')->first();
 
@@ -89,8 +89,8 @@ it('records a price snapshot for every seeded listing', function (): void {
 it('runs the phone seeder idempotently', function (): void {
     $this->seed(PhoneSeeder::class);
 
-    expect(Phone::count())->toBe(count(PhoneCatalog::all()))
-        ->and(PhoneListing::count())->toBe(count(PhoneCatalog::all()) * 4);
+    expect(Phone::count())->toBe(CATALOGUE_SIZE)
+        ->and(PhoneListing::count())->toBe(CATALOGUE_SIZE * 4);
 });
 
 it('gives every brand four highlighted phones', function (): void {

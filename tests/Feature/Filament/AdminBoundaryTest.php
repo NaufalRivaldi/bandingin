@@ -12,10 +12,6 @@ arch('the public site does not depend on filament')
     ->expect('App\Livewire')
     ->not->toUse('App\Filament');
 
-arch('the support catalogues do not depend on filament')
-    ->expect('App\Support')
-    ->not->toUse('App\Filament');
-
 arch('admin code does not reach into livewire pages')
     ->expect('App\Filament')
     ->not->toUse('App\Livewire');
