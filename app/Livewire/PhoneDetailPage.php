@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Data\Phone;
-use App\Support\PhoneCatalog;
-use App\Support\SellerPricing;
+use App\Models\Phone;
+use App\Models\PhoneListing;
+use App\Models\PhoneVariant;
+use App\Money\Rupiah;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -18,46 +20,14 @@ class PhoneDetailPage extends Component
 
     private const int RIVAL_COUNT = 4;
 
-    /**
-     * The spec table, grouped as the design groups it. Values resolve against spec keys,
-     * falling back to the phone's own properties for the three that are not specs.
-     *
-     * @var array<string, array<string, string>>
-     */
-    public const array SPEC_GROUPS = [
-        'Performa' => [
-            'chipset' => 'Chipset',
-            'antutu' => 'Skor AnTuTu',
-            'ram' => 'RAM',
-            'storage' => 'Penyimpanan',
-        ],
-        'Layar' => [
-            'panel' => 'Panel',
-            'nits' => 'Kecerahan',
-            'refresh' => 'Refresh Rate',
-            'resolusi' => 'Resolusi',
-        ],
-        'Kamera' => [
-            'kamera' => 'Kamera Utama',
-            'ultrawide' => 'Ultrawide',
-            'selfie' => 'Kamera Depan',
-            'video' => 'Rekam Video',
-        ],
-        'Baterai & Daya' => [
-            'baterai' => 'Kapasitas',
-            'charge' => 'Pengisian Daya',
-        ],
-        'Bodi & Lainnya' => [
-            'ip' => 'IP Rating',
-            'os' => 'Software',
-            'berat' => 'Berat',
-            'dimensi' => 'Dimensi',
-            'jaringan' => 'Jaringan',
-            'rilis' => 'Rilis',
-        ],
+    /** The three rows the design closes the spec table with, taken from the phone itself. */
+    private const array EXTRA_BODY_ROWS = [
+        'Dimensi' => 'dimensions',
+        'Jaringan' => 'network',
+        'Rilis' => 'released_label',
     ];
 
-    public string $phoneId = '';
+    public string $slug = '';
 
     public int $variant = 0;
 
@@ -65,51 +35,58 @@ class PhoneDetailPage extends Component
 
     public function mount(string $phone): void
     {
-        $resolved = PhoneCatalog::find($phone);
+        abort_unless(Phone::published()->where('slug', $phone)->exists(), 404);
 
-        if (! $resolved instanceof Phone) {
-            abort(404);
-        }
-
-        $this->phoneId = $resolved->id;
+        $this->slug = $phone;
     }
 
     #[Computed]
     public function phone(): Phone
     {
-        return PhoneCatalog::findOrFirst($this->phoneId);
+        return Phone::published()
+            ->with(['brand', 'specs.definition', 'variants', 'listings.store'])
+            ->where('slug', $this->slug)
+            ->firstOrFail();
+    }
+
+    /** @return Collection<int, PhoneVariant> */
+    #[Computed]
+    public function variants(): Collection
+    {
+        return $this->phone()->variants;
     }
 
     /** Official price of the variant the visitor is looking at. */
     #[Computed]
     public function variantPrice(): int
     {
-        return $this->phone()->price + (SellerPricing::VARIANTS[$this->variant]['delta'] ?? 0);
-    }
-
-    /**
-     * Cheapest listing for the selected variant.
-     *
-     * Equivalent to SellerPricing::lowestPriceLabel() on the base variant, but the
-     * variant pills shift every price on the page, this headline included.
-     */
-    #[Computed]
-    public function lowestPriceLabel(): string
-    {
-        return Phone::formatRupiah(SellerPricing::lowestPrice($this->variantPrice()));
+        return $this->variants()->get($this->variant)?->price ?? $this->phone()->price;
     }
 
     #[Computed]
     public function officialPriceLabel(): string
     {
-        return Phone::formatRupiah($this->variantPrice());
+        return Rupiah::format($this->variantPrice());
     }
 
-    /** @return list<array{store: string, note: string, price: string, tag: string}> */
+    /**
+     * The cheapest real listing.
+     *
+     * Listings are stored per phone rather than per variant, so this does not move
+     * with the variant pills — shifting it would invent a marketplace price we do
+     * not have.
+     */
     #[Computed]
-    public function sellers(): array
+    public function lowestPriceLabel(): string
     {
-        return SellerPricing::detailed($this->variantPrice());
+        return Rupiah::format($this->sellers()->min('price') ?? $this->phone()->price);
+    }
+
+    /** @return Collection<int, PhoneListing> */
+    #[Computed]
+    public function sellers(): Collection
+    {
+        return $this->phone()->listings->sortBy('price')->values();
     }
 
     /** @return list<array{label: string, value: string}> */
@@ -130,31 +107,50 @@ class PhoneDetailPage extends Component
     #[Computed]
     public function specGroups(): array
     {
-        $groups = [];
+        $phone = $this->phone();
 
-        foreach (self::SPEC_GROUPS as $title => $labels) {
-            $rows = [];
+        $groups = $phone->specs
+            ->filter(fn ($spec): bool => $spec->definition !== null)
+            ->sortBy(fn ($spec): int => $spec->definition->sort)
+            ->groupBy(fn ($spec): string => $spec->definition->group ?? 'Lainnya')
+            ->map(fn ($specs, string $title): array => [
+                'title' => $title,
+                'rows' => $specs->map(fn ($spec): array => [
+                    'label' => $spec->definition->label,
+                    'value' => $spec->display_value,
+                ])->values()->all(),
+            ])
+            ->values()
+            ->all();
 
-            foreach ($labels as $key => $label) {
-                $rows[] = ['label' => $label, 'value' => $this->specValue($key)];
-            }
-
-            $groups[] = ['title' => $title, 'rows' => $rows];
-        }
-
-        return $groups;
+        return $this->appendBodyRows($groups, $phone);
     }
 
-    /** @return list<Phone> */
+    /** @return Collection<int, Phone> */
     #[Computed]
-    public function rivals(): array
+    public function rivals(): Collection
     {
-        $others = array_filter(
-            PhoneCatalog::all(),
-            fn (Phone $candidate): bool => $candidate->id !== $this->phoneId,
-        );
+        $phone = $this->phone();
 
-        return array_slice(array_values($others), 0, self::RIVAL_COUNT);
+        $sameBrand = Phone::published()
+            ->with(['brand', 'specs.definition'])
+            ->where('brand_id', $phone->brand_id)
+            ->whereKeyNot($phone->getKey())
+            ->take(self::RIVAL_COUNT)
+            ->get();
+
+        if ($sameBrand->count() >= self::RIVAL_COUNT) {
+            return $sameBrand;
+        }
+
+        $others = Phone::published()
+            ->with(['brand', 'specs.definition'])
+            ->whereKeyNot($phone->getKey())
+            ->whereNotIn('id', $sameBrand->pluck('id'))
+            ->take(self::RIVAL_COUNT - $sameBrand->count())
+            ->get();
+
+        return $sameBrand->concat($others);
     }
 
     public function selectVariant(int $index): void
@@ -169,24 +165,33 @@ class PhoneDetailPage extends Component
 
     public function render(): View
     {
-        $phone = $this->phone();
-
         return view('livewire.phone-detail-page', [
-            'variants' => SellerPricing::VARIANTS,
             'thumbnails' => range(0, self::THUMBNAIL_COUNT - 1),
-        ])->title($phone->name.' — Spesifikasi & Harga | Bandingin.id');
+        ])->title($this->phone()->name.' — Spesifikasi & Harga | Bandingin.id');
     }
 
-    /** The design mixes spec-table keys with three plain phone properties. */
-    private function specValue(string $key): string
+    /**
+     * @param  list<array{title: string, rows: list<array{label: string, value: string}>}>  $groups
+     * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+     */
+    private function appendBodyRows(array $groups, Phone $phone): array
     {
-        $phone = $this->phone();
+        $extra = [];
 
-        return match ($key) {
-            'dimensi' => $phone->dimensi,
-            'jaringan' => $phone->jaringan,
-            'rilis' => $phone->rilis,
-            default => $phone->display($key),
-        };
+        foreach (self::EXTRA_BODY_ROWS as $label => $attribute) {
+            $extra[] = ['label' => $label, 'value' => (string) $phone->{$attribute}];
+        }
+
+        foreach ($groups as $index => $group) {
+            if ($group['title'] === 'Bodi & Lainnya') {
+                $groups[$index]['rows'] = [...$group['rows'], ...$extra];
+
+                return $groups;
+            }
+        }
+
+        $groups[] = ['title' => 'Bodi & Lainnya', 'rows' => $extra];
+
+        return $groups;
     }
 }

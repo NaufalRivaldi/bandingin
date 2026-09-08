@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+beforeEach(function (): void {
+    seedCatalog();
+});
+
 it('renders every page with its headline copy', function (string $url, string $expected): void {
     $this->get($url)
         ->assertOk()

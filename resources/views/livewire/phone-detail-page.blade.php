@@ -4,7 +4,7 @@
     <div class="page-wash border-b border-line">
         <div class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(20px,3vw,34px)] pb-[clamp(30px,4vw,52px)]">
             <x-breadcrumb :items="[
-                ['label' => $this->phone->brand],
+                ['label' => $this->phone->brand->name],
                 ['label' => $this->phone->name],
             ]" />
 
@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="min-w-[min(100%,280px)] flex-[1_1_380px]">
-                    <div class="font-mono text-[10.5px] tracking-[.12em] text-muted uppercase">{{ $this->phone->brand }}</div>
+                    <div class="font-mono text-[10.5px] tracking-[.12em] text-muted uppercase">{{ $this->phone->brand->name }}</div>
 
                     <h1 class="mt-2 font-display text-[clamp(28px,4.2vw,48px)] leading-[1.03] font-extrabold tracking-[-.035em]">{{ $this->phone->name }}</h1>
 
@@ -61,7 +61,7 @@
                         >Lihat Semua Harga</a>
 
                         <a
-                            href="{{ route('bandingkan', ['left' => $this->phone->id]) }}"
+                            href="{{ route('bandingkan', ['left' => $this->phone->slug]) }}"
                             class="inline-flex items-center gap-[7px] rounded-[13px] border border-line bg-white px-5 py-3.5 text-[15px] font-semibold text-ink hover:border-brand hover:text-brand"
                         >Bandingkan HP Ini</a>
                     </div>
@@ -87,7 +87,7 @@
         <x-section-heading eyebrow="Penilaian" title="Skor per kategori" />
 
         <div class="mt-[clamp(20px,2.6vw,30px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,230px),1fr))] gap-[clamp(16px,2.4vw,28px)]">
-            @foreach ($this->phone->scores as $label => $value)
+            @foreach ($this->phone->scores() as $label => $value)
                 <x-score-bar wire:key="score-{{ $loop->index }}" :label="$label" :value="$value" />
             @endforeach
         </div>
@@ -118,19 +118,19 @@
     <section id="harga" class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(44px,5.6vw,80px)]">
         <x-section-heading eyebrow="Harga hari ini" title="Daftar penjual">
             <div class="flex flex-wrap gap-2">
-                @foreach ($variants as $index => $option)
+                @foreach ($this->variants as $index => $option)
                     <x-chip
-                        wire:key="variant-{{ $index }}"
+                        wire:key="variant-{{ $option->id }}"
                         :active="$variant === $index"
                         wire:click="selectVariant({{ $index }})"
-                    >{{ $option['label'] }}</x-chip>
+                    >{{ $option->label }}</x-chip>
                 @endforeach
             </div>
         </x-section-heading>
 
         <div class="mt-[clamp(18px,2.4vw,26px)] overflow-hidden rounded-[22px] border border-line">
             @foreach ($this->sellers as $seller)
-                <x-seller-row wire:key="seller-{{ $loop->index }}" :seller="$seller" />
+                <x-seller-row wire:key="seller-{{ $seller->id }}" :seller="$seller" :cheapest="$loop->first" />
             @endforeach
         </div>
 
@@ -143,11 +143,11 @@
         <div class="mt-[clamp(18px,2.4vw,26px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3.5">
             @foreach ($this->rivals as $rival)
                 <a
-                    href="{{ route('hp.show', $rival->id) }}"
-                    wire:key="rival-{{ $rival->id }}"
+                    href="{{ route('hp.show', $rival->slug) }}"
+                    wire:key="rival-{{ $rival->slug }}"
                     class="block rounded-[18px] border border-line bg-surface p-[18px] text-left text-ink transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:text-ink hover:shadow-[0_16px_30px_-22px_rgba(12,20,36,.5)]"
                 >
-                    <span class="block font-mono text-[10px] tracking-[.12em] text-muted uppercase">{{ $rival->brand }}</span>
+                    <span class="block font-mono text-[10px] tracking-[.12em] text-muted uppercase">{{ $rival->brand->name }}</span>
                     <span class="mt-1.5 block font-display text-base leading-[1.3] font-extrabold tracking-[-.02em]">{{ $rival->name }}</span>
                     <span class="mt-1.5 block font-mono text-[13px] text-muted">{{ $rival->formattedPrice() }}</span>
                     <span class="mt-3 block text-[12.5px] font-semibold text-brand">Lihat HP ini →</span>
