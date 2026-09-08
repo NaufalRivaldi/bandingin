@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Actions\CompareDuel;
-use App\Data\DuelResult;
-use App\Data\Phone;
-use App\Support\PhoneCatalog;
-use App\Support\SellerPricing;
+use App\Duel\DuelResult;
+use App\Models\Phone;
+use App\Models\PhoneListing;
+use App\Money\Rupiah;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -18,6 +19,9 @@ use Livewire\Component;
 #[Title('Bandingkan HP — Bandingin.id')]
 class PerbandinganPage extends Component
 {
+    /** How many suggestions the picker dropdown shows. */
+    private const int SUGGESTION_LIMIT = 6;
+
     #[Url]
     public string $left = 'a56';
 
@@ -44,13 +48,13 @@ class PerbandinganPage extends Component
     #[Computed]
     public function leftPhone(): Phone
     {
-        return PhoneCatalog::findOrFirst($this->left);
+        return $this->resolve($this->left);
     }
 
     #[Computed]
     public function rightPhone(): Phone
     {
-        return PhoneCatalog::findOrFirst($this->right);
+        return $this->resolve($this->right);
     }
 
     #[Computed]
@@ -71,35 +75,45 @@ class PerbandinganPage extends Component
     }
 
     /**
-     * One price panel per phone, each with its own marketplace listings.
+     * One price panel per phone, each with its own real marketplace listings.
      *
-     * @return list<array{phone: Phone, lowest: string, sellers: list<array{store: string, note: string, price: string, tag: string}>}>
+     * @return list<array{phone: Phone, lowest: string, sellers: Collection<int, PhoneListing>}>
      */
     #[Computed]
     public function priceCards(): array
     {
         return array_map(
-            static fn (Phone $phone): array => [
-                'phone' => $phone,
-                'lowest' => SellerPricing::lowestPriceLabel($phone),
-                'sellers' => SellerPricing::compact($phone->price),
-            ],
+            function (Phone $phone): array {
+                $sellers = $this->sellersFor($phone);
+
+                return [
+                    'phone' => $phone,
+                    'lowest' => Rupiah::format($sellers->min('price') ?? $phone->price),
+                    'sellers' => $sellers,
+                ];
+            },
             [$this->leftPhone(), $this->rightPhone()],
         );
     }
 
-    /** @return list<Phone> */
-    #[Computed]
-    public function leftSuggestions(): array
+    /** @return Collection<int, PhoneListing> */
+    public function sellersFor(Phone $phone): Collection
     {
-        return PhoneCatalog::search($this->leftQuery);
+        return $phone->listings()->with('store')->orderBy('price')->get();
     }
 
-    /** @return list<Phone> */
+    /** @return Collection<int, Phone> */
     #[Computed]
-    public function rightSuggestions(): array
+    public function leftSuggestions(): Collection
     {
-        return PhoneCatalog::search($this->rightQuery);
+        return $this->suggestions($this->leftQuery);
+    }
+
+    /** @return Collection<int, Phone> */
+    #[Computed]
+    public function rightSuggestions(): Collection
+    {
+        return $this->suggestions($this->rightQuery);
     }
 
     public function openPicker(string $side): void
@@ -116,11 +130,11 @@ class PerbandinganPage extends Component
         $this->open = null;
     }
 
-    public function pick(string $side, string $id): void
+    public function pick(string $side, string $slug): void
     {
         $side === 'left'
-            ? $this->left = $id
-            : $this->right = $id;
+            ? $this->left = $slug
+            : $this->right = $slug;
 
         $this->closePickers();
     }
@@ -154,5 +168,23 @@ class PerbandinganPage extends Component
                 CompareDuel::FULL_GROUPS,
             )),
         ]);
+    }
+
+    /** Falls back to the first published phone so the table is never empty. */
+    private function resolve(string $slug): Phone
+    {
+        return Phone::published()->with('specs.definition')->firstWhere('slug', $slug)
+            ?? Phone::published()->with('specs.definition')->orderBy('id')->firstOrFail();
+    }
+
+    /** @return Collection<int, Phone> */
+    private function suggestions(string $query): Collection
+    {
+        return Phone::published()
+            ->with('brand')
+            ->search($query)
+            ->orderBy('id')
+            ->take(self::SUGGESTION_LIMIT)
+            ->get();
     }
 }

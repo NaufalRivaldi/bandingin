@@ -5,6 +5,10 @@ declare(strict_types=1);
 use App\Livewire\PerbandinganPage;
 use Livewire\Livewire;
 
+beforeEach(function (): void {
+    seedCatalog();
+});
+
 it('compares the pair named in the query string', function (): void {
     $this->get('/bandingkan?left=x7pro&right=ip16')
         ->assertOk()
@@ -59,5 +63,7 @@ it('lists sellers for both phones', function (): void {
     Livewire::test(PerbandinganPage::class)
         ->assertSee('Beli di mana paling murah')
         ->assertSee('TikTok Shop')
-        ->assertSee('Distributor');
+        // One canonical stores table now, so the compact list shows the real
+        // store name rather than the old abbreviated dummy label.
+        ->assertSee('Toko distributor');
 });

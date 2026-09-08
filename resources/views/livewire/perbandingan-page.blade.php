@@ -38,10 +38,10 @@
                         <x-device-mock class="h-[86px] w-[62px] flex-none rounded-[10px]" inset="inset-[4px]" face-radius="rounded-[7px]" />
 
                         <div class="min-w-0 flex-1">
-                            <x-eyebrow>{{ $phone->brand }}</x-eyebrow>
+                            <x-eyebrow>{{ $phone->brand->name }}</x-eyebrow>
 
                             <a
-                                href="{{ route('hp.show', $phone->id) }}"
+                                href="{{ route('hp.show', $phone->slug) }}"
                                 class="mt-[5px] block font-display text-[19px] font-extrabold tracking-[-.025em] text-ink hover:text-brand"
                             >{{ $phone->name }}</a>
 
@@ -82,13 +82,13 @@
                             @forelse ($suggestions[$side] as $suggestion)
                                 <button
                                     type="button"
-                                    wire:key="sugg-{{ $side }}-{{ $suggestion->id }}"
-                                    wire:click="pick('{{ $side }}', '{{ $suggestion->id }}')"
+                                    wire:key="sugg-{{ $side }}-{{ $suggestion->slug }}"
+                                    wire:click="pick('{{ $side }}', '{{ $suggestion->slug }}')"
                                     class="flex w-full cursor-pointer items-center gap-3 rounded-[13px] border-0 bg-transparent px-2.5 py-[9px] text-left hover:bg-surface"
                                 >
                                     <span class="min-w-0 flex-1">
                                         <span class="block text-[14.5px] font-medium text-ink">{{ $suggestion->name }}</span>
-                                        <span class="block text-[11.5px] text-muted">{{ $suggestion->brand }}</span>
+                                        <span class="block text-[11.5px] text-muted">{{ $suggestion->brand->name }}</span>
                                     </span>
                                     <span class="font-mono text-[12.5px] text-ink">{{ $suggestion->formattedPrice() }}</span>
                                 </button>
@@ -223,8 +223,9 @@
                     <div class="flex flex-col">
                         @foreach ($card['sellers'] as $seller)
                             <x-seller-row
-                                wire:key="seller-{{ $card['phone']->id }}-{{ $loop->index }}"
+                                wire:key="seller-{{ $card['phone']->slug }}-{{ $seller->id }}"
                                 :seller="$seller"
+                                :cheapest="$loop->first"
                                 :compact="true"
                             />
                         @endforeach
