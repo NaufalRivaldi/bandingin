@@ -5,7 +5,7 @@
 ])
 
 @php
-    /** @var \App\Data\Phone $phone */
+    /** @var \App\Models\Phone $phone */
     $chips ??= [
         $phone->display('chipset'),
         $phone->display('ram'),
@@ -26,10 +26,10 @@
         @endif
     </div>
 
-    <div class="mt-3.5 font-mono text-[10px] tracking-[.12em] text-muted uppercase">{{ $phone->brand }}</div>
+    <div class="mt-3.5 font-mono text-[10px] tracking-[.12em] text-muted uppercase">{{ $phone->brand->name }}</div>
 
     <a
-        href="{{ route('hp.show', $phone->id) }}"
+        href="{{ route('hp.show', $phone->slug) }}"
         class="mt-[5px] block font-display text-[16.5px] leading-tight font-extrabold tracking-[-.02em] text-ink hover:text-brand"
     >{{ $phone->name }}</a>
 
