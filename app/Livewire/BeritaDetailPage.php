@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Data\Article;
-use App\Support\ArticleRepository;
+use App\Actions\RenderArticleBody;
+use App\Models\Article;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class BeritaDetailPage extends Component
 {
+    /** How many articles the related rail shows. */
+    private const int RELATED_COUNT = 3;
+
     public string $slug = '';
 
     public function mount(string $slug): void
     {
-        abort_if(ArticleRepository::find($slug) === null, 404);
+        abort_unless(Article::published()->where('slug', $slug)->exists(), 404);
 
         $this->slug = $slug;
     }
@@ -24,14 +29,31 @@ class BeritaDetailPage extends Component
     #[Computed]
     public function article(): Article
     {
-        return ArticleRepository::find($this->slug) ?? abort(404);
+        return Article::published()->where('slug', $this->slug)->firstOrFail();
     }
 
-    /** @return list<Article> */
     #[Computed]
-    public function related(): array
+    public function body(): HtmlString
     {
-        return ArticleRepository::related($this->article());
+        return app(RenderArticleBody::class)->handle($this->article());
+    }
+
+    /**
+     * Same-category articles first, then anything else, so the rail is never empty.
+     *
+     * @return Collection<int, Article>
+     */
+    #[Computed]
+    public function related(): Collection
+    {
+        $article = $this->article();
+
+        return Article::published()
+            ->whereKeyNot($article->getKey())
+            ->orderByRaw('case when category = ? then 0 else 1 end', [$article->category->value])
+            ->latest('published_at')
+            ->take(self::RELATED_COUNT)
+            ->get();
     }
 
     /** The page title is per-article, so it cannot be set with the #[Title] attribute. */

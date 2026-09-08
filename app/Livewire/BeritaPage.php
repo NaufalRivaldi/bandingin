@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Data\Article;
-use App\Support\ArticleRepository;
+use App\Enums\ArticleCategory;
+use App\Models\Article;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -15,26 +16,49 @@ use Livewire\Component;
 #[Title('Berita & Ulasan — Bandingin.id')]
 class BeritaPage extends Component
 {
+    public const string ALL_CATEGORIES = 'Semua';
+
     #[Url(as: 'kategori')]
-    public string $category = ArticleRepository::ALL_CATEGORIES;
+    public string $category = self::ALL_CATEGORIES;
 
     public function setCategory(string $category): void
     {
         $this->category = $category;
     }
 
-    /** @return list<Article> */
+    /**
+     * The featured article already has its own hero block on the unfiltered
+     * list, so it is dropped from the grid there.
+     *
+     * @return Collection<int, Article>
+     */
     #[Computed]
-    public function articles(): array
+    public function articles(): Collection
     {
-        return ArticleRepository::forCategory($this->category);
+        $query = Article::published()->latest('published_at');
+
+        if (! $this->showsFeatured()) {
+            return $query->where('category', $this->category)->get();
+        }
+
+        $featured = $this->featured();
+
+        return $query
+            ->when($featured !== null, fn ($query) => $query->whereKeyNot($featured->getKey()))
+            ->get();
+    }
+
+    #[Computed]
+    public function featured(): ?Article
+    {
+        return Article::published()->latest('published_at')->first();
     }
 
     /** The featured hero only makes sense on the unfiltered list. */
     #[Computed]
     public function showsFeatured(): bool
     {
-        return $this->category === ArticleRepository::ALL_CATEGORIES;
+        return $this->category === self::ALL_CATEGORIES;
     }
 
     #[Computed]
@@ -46,8 +70,7 @@ class BeritaPage extends Component
     public function render(): View
     {
         return view('livewire.berita-page', [
-            'categories' => ArticleRepository::categories(),
-            'featured' => ArticleRepository::featured(),
+            'categories' => [self::ALL_CATEGORIES, ...ArticleCategory::values()],
         ]);
     }
 }

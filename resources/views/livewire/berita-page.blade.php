@@ -29,7 +29,7 @@
     @if ($this->showsFeatured)
         <section class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(32px,4vw,56px)]">
             <article class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] items-center gap-[clamp(24px,3.4vw,48px)]">
-                <a href="{{ route('berita.show', $featured->slug) }}" class="block w-full">
+                <a href="{{ route('berita.show', $this->featured->slug) }}" class="block w-full">
                     <span class="photo-slot relative block aspect-16/10 rounded-[22px]">
                         <span class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</span>
                     </span>
@@ -37,21 +37,21 @@
 
                 <div>
                     <div class="flex items-center gap-2.5 font-mono text-[10.5px] tracking-[.14em] uppercase">
-                        <span class="text-brand">{{ $featured->category }}</span>
+                        <span class="text-brand">{{ $this->featured->category->value }}</span>
                         <span class="text-[#c3cee3]">·</span>
                         <span class="text-muted">Sorotan</span>
                     </div>
 
                     <h2 class="mt-3 font-display text-[clamp(24px,3vw,40px)] leading-[1.12] font-extrabold tracking-[-.028em]">
-                        <a href="{{ route('berita.show', $featured->slug) }}" class="text-ink hover:text-brand">{{ $featured->title }}</a>
+                        <a href="{{ route('berita.show', $this->featured->slug) }}" class="text-ink hover:text-brand">{{ $this->featured->title }}</a>
                     </h2>
 
-                    <p class="mt-4 max-w-[520px] text-[clamp(14.5px,1.2vw,16.5px)] leading-[1.7] text-muted">{{ $featured->excerpt }}</p>
+                    <p class="mt-4 max-w-[520px] text-[clamp(14.5px,1.2vw,16.5px)] leading-[1.7] text-muted">{{ $this->featured->excerpt }}</p>
 
                     <div class="mt-[18px] flex items-center gap-3 font-mono text-[11.5px] text-muted">
-                        <span>{{ $featured->dateLong() }}</span>
+                        <span>{{ $this->featured->dateLong() }}</span>
                         <span class="text-[#c3cee3]">·</span>
-                        <span>{{ $featured->readMinutes }} menit baca</span>
+                        <span>{{ $this->featured->read_minutes }} menit baca</span>
                     </div>
                 </div>
             </article>

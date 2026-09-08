@@ -8,10 +8,10 @@
     <div class="anim-fade-up mx-auto max-w-[760px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(26px,3.4vw,52px)]">
         <x-breadcrumb :items="[
             ['label' => 'Berita', 'url' => route('berita')],
-            ['label' => $article->category],
+            ['label' => $article->category->value],
         ]" />
 
-        <x-eyebrow class="mt-[clamp(22px,2.6vw,34px)] text-brand!">{{ $article->category }}</x-eyebrow>
+        <x-eyebrow class="mt-[clamp(22px,2.6vw,34px)] text-brand!">{{ $article->category->value }}</x-eyebrow>
 
         <h1 class="mt-3.5 font-display text-[clamp(28px,4.2vw,52px)] leading-[1.08] font-extrabold tracking-[-.03em] text-pretty">
             {{ $article->title }}
@@ -23,7 +23,7 @@
             <span class="grid size-[34px] place-items-center rounded-full border border-line bg-surface font-mono text-[11px] font-semibold text-muted">RA</span>
             <span class="text-[13.5px] font-medium text-ink">Rizky Adhitama</span>
             <span class="font-mono text-[11.5px] text-muted">{{ $article->dateLong() }}</span>
-            <span class="font-mono text-[11.5px] text-muted">{{ $article->readMinutes }} menit baca</span>
+            <span class="font-mono text-[11.5px] text-muted">{{ $article->read_minutes }} menit baca</span>
         </div>
     </div>
 
@@ -36,73 +36,9 @@
     </div>
 
     <article class="mx-auto mt-[clamp(30px,3.6vw,48px)] max-w-[720px] px-[clamp(16px,2.4vw,24px)]">
-        @foreach ($article->body as $paragraph)
-            <p wire:key="body-{{ $loop->index }}" class="mb-[22px] text-[clamp(16px,1.4vw,17.5px)] leading-[1.78] text-ink">{{ $paragraph }}</p>
-        @endforeach
-
-        <blockquote class="my-8 rounded-r-2xl border-l-[3px] border-brand bg-surface px-[26px] py-[22px]">
-            <p class="font-display text-[clamp(18px,2vw,22px)] leading-[1.4] font-bold tracking-[-.02em]">{{ $article->quote }}</p>
-        </blockquote>
-
-        @if ($article->specs)
-            <div class="my-[34px] overflow-hidden rounded-[20px] border border-line">
-                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface px-[18px] py-4">
-                    <div>
-                        <x-eyebrow class="text-[10px] tracking-[.14em]">Kartu Duel</x-eyebrow>
-                        <div class="mt-1 font-display text-base font-extrabold tracking-[-.02em]">{{ $article->specs->title }}</div>
-                    </div>
-
-                    <a href="{{ route('bandingkan') }}" class="text-[12.5px] font-semibold">Buka perbandingan penuh →</a>
-                </div>
-
-                <table class="w-full table-fixed border-collapse">
-                    <caption class="sr-only">Perbandingan spesifikasi</caption>
-                    <colgroup>
-                        <col class="w-[28%]" />
-                        <col class="w-[36%]" />
-                        <col class="w-[36%]" />
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="px-2.5 pt-3.5 pb-3 pl-4 text-left font-mono text-[10px] font-normal tracking-[.12em] text-muted uppercase">Spesifikasi</th>
-                            <th scope="col" class="px-2.5 pt-3.5 pb-3 text-left font-display text-sm font-extrabold tracking-[-.02em] text-ink">{{ $article->specs->left }}</th>
-                            <th scope="col" class="px-2.5 pt-3.5 pr-4 pb-3 text-left font-display text-sm font-extrabold tracking-[-.02em] text-ink">{{ $article->specs->right }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($article->specs->rows as $row)
-                            <tr wire:key="spec-{{ $loop->index }}">
-                                <th scope="row" class="border-t border-line px-2.5 py-[13px] pl-4 text-left align-top font-sans text-[12.5px] font-medium text-muted">{{ $row['label'] }}</th>
-
-                                <td @class([
-                                    'border-t border-line px-2.5 py-[13px] align-top font-mono text-[12.5px] leading-[1.45] tracking-[-.01em] text-ink',
-                                    'bg-win/7' => $row['winner'] === 'left',
-                                ])>
-                                    {{ $row['left'] }}
-                                    @if ($row['winner'] === 'left')
-                                        <x-win-badge />
-                                    @endif
-                                </td>
-
-                                <td @class([
-                                    'border-t border-line px-2.5 py-[13px] align-top font-mono text-[12.5px] leading-[1.45] tracking-[-.01em] text-ink',
-                                    'bg-win/7' => $row['winner'] === 'right',
-                                ])>
-                                    {{ $row['right'] }}
-                                    @if ($row['winner'] === 'right')
-                                        <x-win-badge />
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-
-        @foreach ($article->bodyRest as $paragraph)
-            <p wire:key="body-rest-{{ $loop->index }}" class="mb-[22px] text-[clamp(16px,1.4vw,17.5px)] leading-[1.78] text-ink">{{ $paragraph }}</p>
-        @endforeach
+        <div class="article-prose text-[clamp(16px,1.4vw,17.5px)] leading-[1.78] text-ink">
+            {!! $this->body !!}
+        </div>
 
         <div class="mt-[30px] rounded-2xl border border-line bg-surface p-[18px]">
             <div class="flex flex-wrap items-center gap-2.5">
