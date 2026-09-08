@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+beforeEach(function (): void {
+    seedCatalog();
+});
+
 use App\Livewire\BeritaPage;
 use App\Livewire\FaqPage;
 use App\Livewire\LegalPage;
