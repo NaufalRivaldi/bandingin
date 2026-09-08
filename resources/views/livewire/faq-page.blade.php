@@ -49,7 +49,7 @@
                         aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
                         class="flex w-full cursor-pointer items-center gap-3.5 border-0 bg-transparent p-[18px] text-left"
                     >
-                        <span class="flex-1 font-display text-[15.5px] font-extrabold tracking-[-.02em] text-ink">{{ $faq['question'] }}</span>
+                        <span class="flex-1 font-display text-[15.5px] font-extrabold tracking-[-.02em] text-ink">{{ $faq->question }}</span>
                         <span
                             @class([
                                 'grid size-[26px] flex-none place-items-center rounded-[9px] border border-line bg-surface font-mono text-sm text-brand transition-transform duration-200',
@@ -59,7 +59,7 @@
                     </button>
 
                     @if ($isOpen)
-                        <div class="max-w-[640px] px-[18px] pb-5 text-[14.5px] leading-[1.7] text-muted">{{ $faq['answer'] }}</div>
+                        <div class="max-w-[640px] px-[18px] pb-5 text-[14.5px] leading-[1.7] text-muted">{{ $faq->answer }}</div>
                     @endif
                 </div>
             @endforeach
