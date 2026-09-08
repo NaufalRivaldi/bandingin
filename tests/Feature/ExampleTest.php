@@ -1,7 +1,10 @@
 <?php
 
-test('the application returns a successful response', function () {
-    $response = $this->get('/');
+declare(strict_types=1);
 
-    $response->assertStatus(200);
+test('the application returns a successful response', function (): void {
+    // The home page renders the catalogue, so it needs one.
+    seedCatalog();
+
+    $this->get('/')->assertStatus(200);
 });
