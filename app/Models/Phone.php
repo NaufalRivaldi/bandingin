@@ -17,6 +17,41 @@ class Phone extends Model
     /** @use HasFactory<PhoneFactory> */
     use HasFactory;
 
+    /**
+     * Catalogue price bands. Shared by the filter scope and the sidebar counts,
+     * so they must not be duplicated in the Livewire component.
+     *
+     * @var array<string, array{label: string, min: int, max: int}>
+     */
+    public const array PRICE_BANDS = [
+        'p1' => ['label' => 'Rp1–2 juta', 'min' => 1_000_000, 'max' => 2_000_000],
+        'p2' => ['label' => 'Rp2–4 juta', 'min' => 2_000_000, 'max' => 4_000_000],
+        'p3' => ['label' => 'Rp4–7 juta', 'min' => 4_000_000, 'max' => 7_000_000],
+        'p4' => ['label' => 'Rp7 juta ke atas', 'min' => 7_000_000, 'max' => PHP_INT_MAX],
+    ];
+
+    /**
+     * Minimum-spec filters that resolve against phone_specs rows.
+     *
+     * @var array<string, array{label: string, key: string, min: int}>
+     */
+    public const array SPEC_FILTERS = [
+        'ram12' => ['label' => 'RAM 12 GB', 'key' => 'ram', 'min' => 12],
+        'hz120' => ['label' => 'Layar 120 Hz', 'key' => 'refresh', 'min' => 120],
+        'bat5k' => ['label' => 'Baterai 5.000 mAh+', 'key' => 'baterai', 'min' => 5000],
+        'fast' => ['label' => 'Isi daya 45W+', 'key' => 'charge', 'min' => 45],
+    ];
+
+    /**
+     * Filters that are plain boolean columns rather than spec rows.
+     *
+     * @var array<string, string>
+     */
+    public const array FLAG_FILTERS = [
+        'nfc' => 'Ada NFC',
+        'ip68' => 'Tahan air IP68',
+    ];
+
     protected $fillable = [
         'brand_id',
         'slug',
@@ -119,6 +154,91 @@ class Phone extends Model
     public function scopePublished(Builder $query): void
     {
         $query->whereNotNull('published_at');
+    }
+
+    /** @param  Builder<$this>  $query */
+    public function scopeSearch(Builder $query, string $term): void
+    {
+        $term = trim($term);
+
+        if ($term === '') {
+            return;
+        }
+
+        $query->where(function (Builder $query) use ($term): void {
+            $query->where('name', 'like', '%'.$term.'%')
+                ->orWhereRelation('brand', 'name', 'like', '%'.$term.'%');
+        });
+    }
+
+    /**
+     * @param  Builder<$this>  $query
+     * @param  list<string>  $bandIds
+     */
+    public function scopeInPriceBands(Builder $query, array $bandIds): void
+    {
+        $bands = array_intersect_key(self::PRICE_BANDS, array_flip($bandIds));
+
+        if ($bands === []) {
+            return;
+        }
+
+        $query->where(function (Builder $query) use ($bands): void {
+            foreach ($bands as $band) {
+                $query->orWhereBetween('price', [$band['min'], $band['max']]);
+            }
+        });
+    }
+
+    /**
+     * @param  Builder<$this>  $query
+     * @param  list<string>  $brandNames
+     */
+    public function scopeOfBrands(Builder $query, array $brandNames): void
+    {
+        if ($brandNames === []) {
+            return;
+        }
+
+        $query->whereHas('brand', fn (Builder $brand): Builder => $brand->whereIn('name', $brandNames));
+    }
+
+    /**
+     * Every selected filter must match, so each becomes its own constraint.
+     *
+     * @param  Builder<$this>  $query
+     * @param  list<string>  $filterIds
+     */
+    public function scopeMatchingSpecFilters(Builder $query, array $filterIds): void
+    {
+        foreach ($filterIds as $id) {
+            if (isset(self::FLAG_FILTERS[$id])) {
+                $query->where($id, true);
+
+                continue;
+            }
+
+            $filter = self::SPEC_FILTERS[$id] ?? null;
+
+            if ($filter === null) {
+                continue;
+            }
+
+            $query->whereHas('specs', fn (Builder $spec): Builder => $spec
+                ->where('comparable_value', '>=', $filter['min'])
+                ->whereHas('definition', fn (Builder $definition): Builder => $definition
+                    ->where('key', $filter['key'])));
+        }
+    }
+
+    /** @param  Builder<$this>  $query */
+    public function scopeSortedBy(Builder $query, string $sort): void
+    {
+        match ($sort) {
+            'murah' => $query->orderBy('price'),
+            'mahal' => $query->orderByDesc('price'),
+            default => $query->orderByDesc('released_at'),
+        };
     }
 
     public function getRouteKeyName(): string
