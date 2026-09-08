@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Data\DuelGroup;
-use App\Data\DuelResult;
-use App\Data\DuelRow;
-use App\Data\Phone;
+use App\Duel\DuelGroup;
+use App\Duel\DuelResult;
+use App\Duel\DuelRow;
+use App\Models\Phone;
 
 /**
  * Scores two phones against each other, row by row.

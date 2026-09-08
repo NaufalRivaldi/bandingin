@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Data;
+namespace App\Duel;
+
+use App\Models\Phone;
 
 final readonly class DuelResult
 {
