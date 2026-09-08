@@ -121,3 +121,10 @@ it('chains scopes together', function (): void {
         Phone::query()->ofBrands(['Samsung'])->inPriceBands(['p3'])->pluck('name')->all()
     )->toBe(['Cocok']);
 });
+
+it('treats the band upper bound as exclusive so bands never overlap', function (): void {
+    Phone::factory()->create(['price' => 2_000_000, 'name' => 'Tepat di batas']);
+
+    expect(Phone::inPriceBands(['p1'])->count())->toBe(0)
+        ->and(Phone::inPriceBands(['p2'])->pluck('name')->all())->toBe(['Tepat di batas']);
+});

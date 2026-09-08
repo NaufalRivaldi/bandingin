@@ -50,13 +50,13 @@
                         <div class="text-[13px] font-semibold">Rentang harga</div>
 
                         <div class="mt-3 flex flex-col gap-[9px]">
-                            @foreach ($priceRanges as $range)
-                                @php($active = in_array($range['id'], $prices, true))
+                            @foreach ($priceRanges as $rangeId => $range)
+                                @php($active = in_array($rangeId, $prices, true))
 
                                 <button
                                     type="button"
-                                    wire:key="price-{{ $range['id'] }}"
-                                    wire:click="togglePrice('{{ $range['id'] }}')"
+                                    wire:key="price-{{ $rangeId }}"
+                                    wire:click="togglePrice('{{ $rangeId }}')"
                                     @class([
                                         'flex w-full min-h-[34px] cursor-pointer items-center gap-2.5 border-0 bg-transparent px-0 py-0.5 text-left font-sans text-[13.5px] text-ink',
                                         'font-semibold' => $active,
@@ -70,7 +70,7 @@
 
                                     <span class="flex-1 text-left">{{ $range['label'] }}</span>
 
-                                    <span class="font-mono text-[11px] text-muted">{{ $this->priceCounts[$range['id']] }}</span>
+                                    <span class="font-mono text-[11px] text-muted">{{ $this->priceCounts[$rangeId] }}</span>
                                 </button>
                             @endforeach
                         </div>
@@ -94,13 +94,13 @@
                         <div class="text-[13px] font-semibold">Spesifikasi minimum</div>
 
                         <div class="mt-3 flex flex-col gap-[9px]">
-                            @foreach ($specFilters as $filter)
-                                @php($active = in_array($filter['id'], $specs, true))
+                            @foreach ($specFilters as $filterId => $filter)
+                                @php($active = in_array($filterId, $specs, true))
 
                                 <button
                                     type="button"
-                                    wire:key="spec-{{ $filter['id'] }}"
-                                    wire:click="toggleSpec('{{ $filter['id'] }}')"
+                                    wire:key="spec-{{ $filterId }}"
+                                    wire:click="toggleSpec('{{ $filterId }}')"
                                     @class([
                                         'flex w-full min-h-[34px] cursor-pointer items-center gap-2.5 border-0 bg-transparent px-0 py-0.5 text-left font-sans text-[13.5px] text-ink',
                                         'font-semibold' => $active,
@@ -139,16 +139,16 @@
                 </div>
             </div>
 
-            @if ($this->results !== [])
+            @if ($this->results->isNotEmpty())
                 <div class="mt-[clamp(16px,2.2vw,24px)] grid grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] gap-4">
                     @foreach ($this->results as $phone)
-                        @php($picked = in_array($phone->id, $this->picked, true))
+                        @php($picked = in_array($phone->slug, $this->picked, true))
 
-                        <x-phone-card wire:key="card-{{ $phone->id }}" :phone="$phone" :selected="$picked">
+                        <x-phone-card wire:key="card-{{ $phone->slug }}" :phone="$phone" :selected="$picked">
                             <div class="mt-3.5 flex items-center gap-2">
                                 <button
                                     type="button"
-                                    wire:click="toggleCompare('{{ $phone->id }}')"
+                                    wire:click="toggleCompare('{{ $phone->slug }}')"
                                     @class([
                                         'flex-1 cursor-pointer rounded-[11px] border px-3 py-2.5 font-sans text-[12.5px] font-semibold',
                                         'border-brand bg-brand text-white' => $picked,
@@ -156,7 +156,7 @@
                                     ])
                                 >{{ $picked ? 'Dipilih ✓' : 'Bandingkan' }}</button>
 
-                                <a href="{{ route('hp.show', $phone->id) }}" class="text-[12.5px] font-semibold">Detail →</a>
+                                <a href="{{ route('hp.show', $phone->slug) }}" class="text-[12.5px] font-semibold">Detail →</a>
                             </div>
                         </x-phone-card>
                     @endforeach
@@ -179,7 +179,7 @@
         </main>
     </div>
 
-    @if ($this->pickedPhones !== [])
+    @if ($this->pickedPhones->isNotEmpty())
         <div class="sticky bottom-0 z-25 mt-7 border-t border-line bg-white/94 shadow-[0_-10px_30px_-20px_rgba(12,20,36,.4)] backdrop-blur-[14px]">
             <div class="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3.5 px-[clamp(16px,2.4vw,24px)] py-3.5">
                 <div class="flex flex-wrap items-center gap-3">
@@ -197,7 +197,7 @@
                     @php($ready = count($this->pickedPhones) === $maxPicks)
 
                     <a
-                        href="{{ $ready ? route('bandingkan', ['left' => $this->pickedPhones[0]->id, 'right' => $this->pickedPhones[1]->id]) : '#katalog' }}"
+                        href="{{ $ready ? route('bandingkan', ['left' => $this->pickedPhones[0]->slug, 'right' => $this->pickedPhones[1]->slug]) : '#katalog' }}"
                         @if (! $ready) aria-disabled="true" @endif
                         @class([
                             'inline-flex items-center gap-[7px] rounded-xl px-5 py-3 text-sm font-semibold text-white',

@@ -13,9 +13,9 @@ use Illuminate\Support\Str;
 /**
  * Attaches each brand's four showcase models from App\Support\BrandCatalog.
  *
- * Models with no PhoneCatalog entry get a minimal published phone row — name,
- * price and the catalogue's spec blurb — so the Merek page can render its card.
- * An editor fills in specs, scores and copy later through the admin panel.
+ * Models with no PhoneCatalog entry get a minimal DRAFT phone row — name, price
+ * and the catalogue's spec blurb — so the Merek page can render its card while
+ * the catalogue ignores them. An editor fills in the rest and publishes later.
  */
 class BrandHighlightSeeder extends Seeder
 {
@@ -62,7 +62,10 @@ class BrandHighlightSeeder extends Seeder
             'score_kamera' => 0,
             'score_baterai' => 0,
             'score_nilai' => 0,
-            'published_at' => now(),
+            // Stubs: name and price only, no specs or scores. They are drafts so the
+            // catalogue and search never show a half-empty card; the Merek page reads
+            // the highlights relation directly, which does not filter on published.
+            'published_at' => null,
         ]);
     }
 }

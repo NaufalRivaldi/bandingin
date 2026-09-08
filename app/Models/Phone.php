@@ -183,9 +183,12 @@ class Phone extends Model
             return;
         }
 
+        // Upper bound is exclusive so adjacent bands never both claim a price.
         $query->where(function (Builder $query) use ($bands): void {
             foreach ($bands as $band) {
-                $query->orWhereBetween('price', [$band['min'], $band['max']]);
+                $query->orWhere(fn (Builder $band2): Builder => $band2
+                    ->where('price', '>=', $band['min'])
+                    ->where('price', '<', $band['max']));
             }
         });
     }

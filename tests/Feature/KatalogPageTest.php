@@ -5,6 +5,10 @@ declare(strict_types=1);
 use App\Livewire\KatalogPage;
 use Livewire\Livewire;
 
+beforeEach(function (): void {
+    seedCatalog();
+});
+
 it('lists the whole catalogue by default', function (): void {
     Livewire::test(KatalogPage::class)
         ->assertSee('12 HP ditemukan dari 12 total')

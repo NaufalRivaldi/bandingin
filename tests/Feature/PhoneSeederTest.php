@@ -107,5 +107,6 @@ it('creates phones for highlight models missing from the catalogue', function ()
     $phone = Phone::where('name', 'Redmi 14C')->sole();
 
     expect($phone->price)->toBe(1_399_000)
-        ->and($phone->published_at)->not->toBeNull();
+        // Stubs carry no specs or scores, so they stay drafts and out of the catalogue.
+        ->and($phone->published_at)->toBeNull();
 });
