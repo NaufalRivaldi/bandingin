@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Actions\CompareDuel;
-use App\Data\DuelResult;
-use App\Data\Phone;
-use App\Support\ArticleRepository;
-use App\Support\PhoneCatalog;
+use App\Duel\DuelResult;
+use App\Models\Article;
+use App\Models\FeaturedMatchup;
+use App\Models\Phone;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -17,6 +18,9 @@ use Livewire\Component;
 #[Title('Bandingin.id — Jangan Beli HP Sebelum Dibandingkan')]
 class HomePage extends Component
 {
+    /** How many suggestions the picker dropdown shows. */
+    private const int SUGGESTION_LIMIT = 6;
+
     public string $left = 'a56';
 
     public string $right = 'note14pro';
@@ -30,14 +34,6 @@ class HomePage extends Component
 
     public bool $onlyDifferences = false;
 
-    /** @var list<array{left: string, right: string, label: string}> */
-    public const array MATCHUPS = [
-        ['left' => 'a56', 'right' => 'note14pro', 'label' => 'Galaxy A56 vs Redmi Note 14 Pro'],
-        ['left' => 'x7pro', 'right' => 'r13pp', 'label' => 'POCO X7 Pro vs realme 13 Pro+'],
-        ['left' => 'ip16', 'right' => 's25', 'label' => 'iPhone 16 vs Galaxy S25'],
-        ['left' => 'note40pro', 'right' => 'note14pro', 'label' => 'Infinix Note 40 Pro vs Redmi Note 14 Pro'],
-    ];
-
     public function mount(): void
     {
         $this->syncQueriesToSelection();
@@ -46,13 +42,13 @@ class HomePage extends Component
     #[Computed]
     public function leftPhone(): Phone
     {
-        return PhoneCatalog::findOrFirst($this->left);
+        return $this->resolve($this->left);
     }
 
     #[Computed]
     public function rightPhone(): Phone
     {
-        return PhoneCatalog::findOrFirst($this->right);
+        return $this->resolve($this->right);
     }
 
     #[Computed]
@@ -66,18 +62,18 @@ class HomePage extends Component
         );
     }
 
-    /** @return list<Phone> */
+    /** @return Collection<int, Phone> */
     #[Computed]
-    public function leftSuggestions(): array
+    public function leftSuggestions(): Collection
     {
-        return PhoneCatalog::search($this->leftQuery);
+        return $this->suggestions($this->leftQuery);
     }
 
-    /** @return list<Phone> */
+    /** @return Collection<int, Phone> */
     #[Computed]
-    public function rightSuggestions(): array
+    public function rightSuggestions(): Collection
     {
-        return PhoneCatalog::search($this->rightQuery);
+        return $this->suggestions($this->rightQuery);
     }
 
     public function openPicker(string $side): void
@@ -95,11 +91,11 @@ class HomePage extends Component
         $this->syncQueriesToSelection();
     }
 
-    public function pick(string $side, string $id): void
+    public function pick(string $side, string $slug): void
     {
         $side === 'left'
-            ? $this->left = $id
-            : $this->right = $id;
+            ? $this->left = $slug
+            : $this->right = $slug;
 
         $this->closePickers();
     }
@@ -119,11 +115,31 @@ class HomePage extends Component
 
     public function render(): View
     {
+        $articles = Article::published()->latest('published_at')->take(5)->get();
+
         return view('livewire.home-page', [
-            'matchups' => self::MATCHUPS,
-            'featured' => ArticleRepository::featured(),
-            'latest' => array_slice(ArticleRepository::all(), 1, 4),
+            'matchups' => FeaturedMatchup::with(['leftPhone', 'rightPhone'])->orderBy('sort')->get(),
+            'featured' => $articles->first(),
+            'latest' => $articles->skip(1)->values(),
         ]);
+    }
+
+    /** Falls back to the first published phone so the duel card is never empty. */
+    private function resolve(string $slug): Phone
+    {
+        return Phone::published()->with('specs.definition')->firstWhere('slug', $slug)
+            ?? Phone::published()->with('specs.definition')->orderBy('id')->firstOrFail();
+    }
+
+    /** @return Collection<int, Phone> */
+    private function suggestions(string $query): Collection
+    {
+        return Phone::published()
+            ->with('brand')
+            ->search($query)
+            ->orderBy('id')
+            ->take(self::SUGGESTION_LIMIT)
+            ->get();
     }
 
     /** Closed pickers show the selected phone's name rather than the search term. */

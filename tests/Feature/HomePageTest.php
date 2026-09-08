@@ -5,6 +5,10 @@ declare(strict_types=1);
 use App\Livewire\HomePage;
 use Livewire\Livewire;
 
+beforeEach(function (): void {
+    seedCatalog();
+});
+
 it('renders the hero and the default duel', function (): void {
     $this->get(route('home'))
         ->assertOk()
@@ -25,15 +29,19 @@ it('swaps both phones when a popular matchup is picked', function (): void {
 });
 
 it('filters picker suggestions by the typed query', function (): void {
-    // Both strings below appear only inside the suggestion dropdown, so they isolate it
-    // from the matchup shortcuts and budget cards that also name phones.
-    Livewire::test(HomePage::class)
+    // Asserted against the suggestion collection rather than rendered copy: matchup
+    // shortcut labels are derived from full phone names, so they also mention phones.
+    $component = Livewire::test(HomePage::class)
         ->call('openPicker', 'left')
-        ->assertSet('open', 'left')
-        ->assertSee('realme 13 Pro+ 5G')
-        ->set('leftQuery', 'poco')
-        ->assertSee('POCO M7 Pro 5G')
-        ->assertDontSee('realme 13 Pro+ 5G');
+        ->assertSet('open', 'left');
+
+    expect($component->instance()->leftSuggestions()->pluck('name'))
+        ->toContain('realme 13 Pro+ 5G');
+
+    $filtered = $component->set('leftQuery', 'poco')->instance()->leftSuggestions()->pluck('name');
+
+    expect($filtered)->toContain('POCO M7 Pro 5G')
+        ->and($filtered)->not->toContain('realme 13 Pro+ 5G');
 });
 
 it('selects a phone from the picker and closes the dropdown', function (): void {

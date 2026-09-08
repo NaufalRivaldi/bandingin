@@ -49,7 +49,7 @@
                     <p class="mt-4 max-w-[520px] text-[clamp(14.5px,1.2vw,16.5px)] leading-[1.7] text-muted">{{ $featured->excerpt }}</p>
 
                     <div class="mt-[18px] flex items-center gap-3 font-mono text-[11.5px] text-muted">
-                        <span>{{ $featured->dateLong }}</span>
+                        <span>{{ $featured->dateLong() }}</span>
                         <span class="text-[#c3cee3]">·</span>
                         <span>{{ $featured->readMinutes }} menit baca</span>
                     </div>

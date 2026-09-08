@@ -22,7 +22,7 @@
         <div class="mt-6 flex flex-wrap items-center gap-3.5 border-y border-line py-4">
             <span class="grid size-[34px] place-items-center rounded-full border border-line bg-surface font-mono text-[11px] font-semibold text-muted">RA</span>
             <span class="text-[13.5px] font-medium text-ink">Rizky Adhitama</span>
-            <span class="font-mono text-[11.5px] text-muted">{{ $article->dateLong }}</span>
+            <span class="font-mono text-[11.5px] text-muted">{{ $article->dateLong() }}</span>
             <span class="font-mono text-[11.5px] text-muted">{{ $article->readMinutes }} menit baca</span>
         </div>
     </div>

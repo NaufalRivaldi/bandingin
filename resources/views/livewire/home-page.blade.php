@@ -52,14 +52,14 @@
                                         @forelse ($side === 'left' ? $this->leftSuggestions : $this->rightSuggestions as $suggestion)
                                             <button
                                                 type="button"
-                                                wire:key="sugg-{{ $side }}-{{ $suggestion->id }}"
-                                                wire:click="pick('{{ $side }}', '{{ $suggestion->id }}')"
+                                                wire:key="sugg-{{ $side }}-{{ $suggestion->slug }}"
+                                                wire:click="pick('{{ $side }}', '{{ $suggestion->slug }}')"
                                                 class="flex w-full cursor-pointer items-center gap-3 rounded-[13px] border-0 bg-transparent px-2.5 py-[9px] text-left hover:bg-surface"
                                             >
                                                 <x-device-mock class="h-11 w-8 flex-none rounded-md" inset="inset-[3px]" face-radius="rounded-sm" />
                                                 <span class="min-w-0 flex-1">
                                                     <span class="block text-[14.5px] font-medium text-ink">{{ $suggestion->name }}</span>
-                                                    <span class="block text-[11.5px] text-muted">{{ $suggestion->brand }}</span>
+                                                    <span class="block text-[11.5px] text-muted">{{ $suggestion->brand->name }}</span>
                                                 </span>
                                                 <span class="font-mono text-[12.5px] text-ink">{{ $suggestion->formattedPrice() }}</span>
                                             </button>
@@ -88,9 +88,9 @@
                             <button
                                 type="button"
                                 wire:key="matchup-{{ $loop->index }}"
-                                wire:click="setMatchup('{{ $matchup['left'] }}', '{{ $matchup['right'] }}')"
+                                wire:click="setMatchup('{{ $matchup->leftPhone->slug }}', '{{ $matchup->rightPhone->slug }}')"
                                 class="cursor-pointer rounded-full border border-line bg-white/70 px-3.5 py-2 font-sans text-[12.5px] font-medium text-ink transition-colors duration-200 hover:border-line-strong hover:bg-white"
-                            >{{ $matchup['label'] }}</button>
+                            >{{ $matchup->label() }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -128,14 +128,14 @@
                             </th>
 
                             @foreach ([$this->leftPhone, $this->rightPhone] as $phone)
-                                <th scope="col" wire:key="head-{{ $phone->id }}" class="px-2.5 pt-[clamp(16px,2vw,24px)] pb-4 text-left">
+                                <th scope="col" wire:key="head-{{ $phone->slug }}" class="px-2.5 pt-[clamp(16px,2vw,24px)] pb-4 text-left">
                                     <x-device-mock class="h-[clamp(60px,8vw,88px)] w-[clamp(44px,6vw,64px)]" inset="inset-[4px]" />
 
                                     <span class="mt-3 block font-display text-[clamp(14px,1.5vw,18px)] font-extrabold tracking-[-.02em] text-ink">{{ $phone->name }}</span>
                                     <span class="mt-1.5 block font-mono text-[clamp(12px,1.3vw,15px)] font-medium text-ink">{{ $phone->formattedPrice() }}</span>
 
                                     <span class="mt-2.5 flex flex-wrap items-center gap-2">
-                                        <x-affiliate-link :href="route('hp.show', $phone->id)" />
+                                        <x-affiliate-link :href="route('hp.show', $phone->slug)" />
                                     </span>
 
                                     <x-marketplace-tags class="mt-2" />
@@ -235,13 +235,13 @@
                         <div class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</div>
                     </div>
 
-                    <div class="mt-5 font-mono text-[10.5px] tracking-[.14em] text-brand uppercase">{{ $featured->category }}</div>
+                    <div class="mt-5 font-mono text-[10.5px] tracking-[.14em] text-brand uppercase">{{ $featured->category->value }}</div>
 
                     <h3 class="mt-2.5 font-display text-[clamp(21px,2.4vw,30px)] leading-[1.15] font-extrabold tracking-[-.025em]">{{ $featured->title }}</h3>
 
                     <p class="mt-3.5 max-w-[520px] text-[15px] leading-[1.65] text-muted">{{ $featured->excerpt }}</p>
 
-                    <div class="mt-3.5 font-mono text-[11.5px] text-muted">{{ $featured->dateLong }}</div>
+                    <div class="mt-3.5 font-mono text-[11.5px] text-muted">{{ $featured->dateLong() }}</div>
                 </a>
             </article>
 
