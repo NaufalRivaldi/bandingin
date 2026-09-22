@@ -9,6 +9,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -26,6 +27,11 @@ class FaqsTable
                     ->label('Pertanyaan')
                     ->searchable()
                     ->limit(70),
+                TextColumn::make('answer')
+                    ->label('Jawaban')
+                    ->searchable()
+                    ->limit(60)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sort')
                     ->label('Urutan')
                     ->numeric()
@@ -34,8 +40,11 @@ class FaqsTable
             ->filters([
                 SelectFilter::make('topic')
                     ->label('Topik')
-                    ->options(FaqTopic::class),
-            ])
+                    ->options(FaqTopic::class)
+                    ->multiple(),
+            ], layout: FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(2)
+            ->deferFilters()
             ->defaultSort('sort')
             ->reorderable('sort')
             ->recordActions([

@@ -21,7 +21,9 @@ class StoreResource extends Resource
 {
     protected static ?string $model = Store::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
+
+    protected static ?int $navigationSort = 4;
 
     protected static string|UnitEnum|null $navigationGroup = 'Katalog';
 

@@ -14,6 +14,7 @@ use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
 use App\Filament\Resources\Stores\StoreResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use Filament\Support\Icons\Heroicon;
 
 beforeEach(function (): void {
     $this->actingAs(User::factory()->create());
@@ -70,4 +71,14 @@ it('covers every registered resource', function (): void {
 
     expect($covered->sort()->values()->all())
         ->toBe($registered->sort()->values()->all());
+});
+
+it('gives every resource its own navigation icon', function (): void {
+    $icons = collect(Filament\Facades\Filament::getPanel('admin')->getResources())
+        ->mapWithKeys(fn (string $resource): array => [$resource => $resource::getNavigationIcon()]);
+
+    expect($icons->filter(fn (mixed $icon): bool => $icon === Heroicon::OutlinedRectangleStack)->all())
+        ->toBe([], 'A resource is still on the generator default icon.')
+        ->and($icons->duplicates()->all())
+        ->toBe([], 'Two resources share a navigation icon.');
 });

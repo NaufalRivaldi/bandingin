@@ -23,7 +23,9 @@ class NewsletterSubscriberResource extends Resource
 
     protected static ?string $navigationLabel = 'Newsletter';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

@@ -21,7 +21,9 @@ class SpecDefinitionResource extends Resource
 {
     protected static ?string $model = SpecDefinition::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
+
+    protected static ?int $navigationSort = 5;
 
     protected static string|UnitEnum|null $navigationGroup = 'Katalog';
 
