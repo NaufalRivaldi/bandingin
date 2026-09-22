@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\BeritaDetailPage;
 use App\Livewire\BeritaPage;
 use App\Models\Article;
+use App\Models\NewsItem;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -63,3 +64,42 @@ it('prefers same-category articles in the related rail', function (): void {
         ->and($related->pluck('id')->all())->not->toContain($article->id)
         ->and($related->first()->category)->toBe($article->category);
 });
+
+it('shows aggregated news in its own section, not the article grid', function (): void {
+    $item = NewsItem::factory()->create([
+        'title' => 'Kabar dari luar',
+        'url' => 'https://www.tek.id/gadget/kabar-b2qbp9uhh',
+    ]);
+
+    $response = $this->get(route('berita'));
+
+    $response->assertSuccessful()
+        ->assertSee('Kabar Teknologi')
+        ->assertSee($item->url);
+
+    // The item must not have acquired a page on this site.
+    $this->get('/berita/kabar-b2qbp9uhh')->assertNotFound();
+});
+
+it('keeps aggregated news out of the article count', function (): void {
+    // The grid's "N artikel" tally counts Articles only. Asserting it is
+    // unchanged by news items avoids restating BeritaPage's own rule that the
+    // featured article is dropped from the grid.
+    $countBefore = articleTallyOnBeritaPage();
+
+    NewsItem::factory()->count(5)->create();
+
+    expect(articleTallyOnBeritaPage())->toBe($countBefore);
+});
+
+/** The "N artikel" number rendered above the article grid. */
+function articleTallyOnBeritaPage(): int
+{
+    $html = Livewire::test(BeritaPage::class)->html();
+
+    expect($html)->toMatch('/(\d+) artikel/');
+
+    preg_match('/(\d+) artikel/', $html, $matches);
+
+    return (int) $matches[1];
+}
