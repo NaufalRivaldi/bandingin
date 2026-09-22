@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <generator>https://www.tek.id</generator>
+        <title>Berita tek.id</title>
+        <description>Berita - berita tek.id pada kanal Gadget</description>
+        <link>https://www.tek.id/gadget</link>
+        <language>id</language>
+        <item>
+            <title><![CDATA[realme 16 Pro Harry Potter Edition Resmi Meluncur, Ini Harga dan Spesifikasinya]]></title>
+            <link><![CDATA[https://www.tek.id/gadget/realme-16-pro-harry-potter-edition-meluncur-ini-harganya-b2qbp9uhh]]></link>
+            <guid isPermaLink="false"><![CDATA[https://www.tek.id/gadget/realme-16-pro-harry-potter-edition-meluncur-ini-harganya-b2qbp9uhh]]></guid>
+            <description><![CDATA[realme 16 Pro Harry Potter Edition meluncur di Indonesia seharga Rp10,9 juta, membawa kamera 200 MP dan desain Hogwarts yang berubah warna.]]></description>
+            <media:content url="https://www.tek.id/gadget/realme-16-pro-harry-potter-edition-meluncur-ini-harganya-b2qbp9uhh" expression="full" type="image/jpeg"><![CDATA[realme 16 Pro Harry Potter Edition]]></media:content >
+            <category><![CDATA[Gadget]]></category>
+            <pubDate><![CDATA[2026-09-21 19:18:00]]></pubDate>
+        </item>
+        <item>
+            <title><![CDATA[TCL C7L Punya 1.352 Zona Dimming, Kecerahan Tembus HDR 3.000 Nits]]></title>
+            <link><![CDATA[https://www.tek.id/gadget/tcl-c7l-punya-1352-zona-dimming-tembus-hdr-3000-nits-b2qbb9ugd]]></link>
+            <guid isPermaLink="false"><![CDATA[https://www.tek.id/gadget/tcl-c7l-punya-1352-zona-dimming-tembus-hdr-3000-nits-b2qbb9ugd]]></guid>
+            <description><![CDATA[TCL memperkuat C7L SQD-Mini LED di Indonesia dengan 1.352 dimming zone, HDR 3.000 nits, dan audio Bang &amp; Olufsen.]]></description>
+            <category><![CDATA[Gadget]]></category>
+            <pubDate><![CDATA[2026-09-07 09:30:00]]></pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Asus ROG Pamer Monitor OLED 720Hz di Gamescom 2026]]></title>
+            <link><![CDATA[https://www.tek.id/gadget/asus-rog-pamer-monitor-oled-720hz-di-gamescom-2026-b2qaY9ufR]]></link>
+            <description><![CDATA[Monitor OLED 720Hz pertama Asus dipamerkan di Gamescom 2026.]]></description>
+            <category><![CDATA[Gadget]]></category>
+            <pubDate><![CDATA[2026-08-20 14:05:00]]></pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Item rusak tanpa tautan]]></title>
+            <description><![CDATA[Item ini tidak punya link dan harus dilewati.]]></description>
+            <category><![CDATA[Gadget]]></category>
+            <pubDate><![CDATA[2026-08-19 10:00:00]]></pubDate>
+        </item>
+    </channel>
+</rss>

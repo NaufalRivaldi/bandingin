@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'tek' => [
+        'base_url' => env('TEK_BASE_URL', 'https://www.tek.id'),
+        'user_agent' => env('TEK_USER_AGENT', 'BandinginBot/1.0 (+https://bandingin.id)'),
+    ],
+
 ];
