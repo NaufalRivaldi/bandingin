@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\HomePage;
+use App\Models\Article;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -63,4 +64,51 @@ it('hides tied rows when the differences toggle is on', function (): void {
         // Both phones are IP67, so that row disappears while Chipset stays.
         ->assertDontSee('IP Rating')
         ->assertSee('Chipset');
+});
+
+it('writes the news heading without an html entity', function (): void {
+    // The section-heading component escapes {{ $title }}, so passing "&amp;"
+    // rendered the entity literally on the page.
+    $this->get(route('home'))
+        ->assertSee('Berita dan Ulasan')
+        ->assertDontSee('&amp;amp;', escape: false)
+        ->assertDontSee('Berita &amp; Ulasan', escape: false);
+});
+
+it('shows the featured article image in the news section', function (): void {
+    Article::query()->delete();
+
+    Article::factory()->create([
+        'title' => 'Artikel utama',
+        'image_url' => 'https://static.tek.id/utama.jpeg',
+        'published_at' => now(),
+    ]);
+
+    $this->get(route('home'))->assertSee('https://static.tek.id/utama.jpeg');
+});
+
+it('shows thumbnails for the latest article list', function (): void {
+    Article::query()->delete();
+
+    Article::factory()->create([
+        'image_url' => 'https://static.tek.id/utama.jpeg',
+        'published_at' => now(),
+    ]);
+    Article::factory()->create([
+        'image_url' => 'https://static.tek.id/kecil.jpeg',
+        'published_at' => now()->subDay(),
+    ]);
+
+    $this->get(route('home'))->assertSee('https://static.tek.id/kecil.jpeg');
+});
+
+it('falls back to the placeholder when an article has no image', function (): void {
+    Article::query()->delete();
+
+    Article::factory()->create([
+        'image_url' => null,
+        'published_at' => now(),
+    ]);
+
+    $this->get(route('home'))->assertSee('photo-slot');
 });
