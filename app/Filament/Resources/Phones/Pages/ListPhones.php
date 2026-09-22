@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Phones\Pages;
 
+use App\Filament\Imports\PhoneImporter;
 use App\Filament\Resources\Phones\PhoneResource;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListPhones extends ListRecords
@@ -15,6 +17,9 @@ class ListPhones extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ImportAction::make()
+                ->importer(PhoneImporter::class)
+                ->label('Impor CSV'),
             CreateAction::make(),
         ];
     }

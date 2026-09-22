@@ -9,6 +9,12 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seeds lookup data only. The catalogue itself arrives through the CSV
+     * importer on the phones page, so no dummy phones, articles, FAQs,
+     * highlights or matchups are planted here. The seeders for those still
+     * exist and are used as fixtures by tests/Pest.php::seedCatalog().
+     */
     public function run(): void
     {
         User::factory()->create([
@@ -20,11 +26,6 @@ class DatabaseSeeder extends Seeder
             SpecDefinitionSeeder::class,
             StoreSeeder::class,
             BrandSeeder::class,
-            PhoneSeeder::class,
-            BrandHighlightSeeder::class,
-            ArticleSeeder::class,
-            FaqSeeder::class,
-            FeaturedMatchupSeeder::class,
             ScrapeSourceSeeder::class,
         ]);
     }

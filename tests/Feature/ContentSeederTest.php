@@ -9,8 +9,12 @@ const FAQ_COUNT = 10;
 use App\Enums\ArticleCategory;
 use App\Enums\FaqTopic;
 use App\Models\Article;
+use App\Models\Brand;
 use App\Models\Faq;
 use App\Models\FeaturedMatchup;
+use App\Models\Phone;
+use App\Models\SpecDefinition;
+use App\Models\Store;
 use Database\Seeders\ArticleSeeder;
 use Database\Seeders\FaqSeeder;
 
@@ -52,8 +56,20 @@ it('seeds every faq under a valid topic', function (): void {
         ->and(Faq::where('topic', FaqTopic::KartuDuel)->count())->toBe(3);
 });
 
-it('seeds the full database in dependency order', function (): void {
+it('seeds lookup data only, leaving the catalogue to the CSV importer', function (): void {
     $this->seed();
+
+    expect(SpecDefinition::count())->toBeGreaterThan(0)
+        ->and(Brand::count())->toBeGreaterThan(0)
+        ->and(Store::count())->toBeGreaterThan(0)
+        ->and(Phone::count())->toBe(0)
+        ->and(Article::count())->toBe(0)
+        ->and(Faq::count())->toBe(0)
+        ->and(FeaturedMatchup::count())->toBe(0);
+});
+
+it('still seeds matchups against real phones when the fixture seeders run', function (): void {
+    seedCatalog();
 
     expect(FeaturedMatchup::count())->toBe(4)
         ->and(FeaturedMatchup::with(['leftPhone', 'rightPhone'])->first()->label())

@@ -126,6 +126,20 @@ class PhoneForm
                             ->reorderable()
                             ->addActionLabel('Tambah kekurangan'),
                     ]),
+                Section::make('Foto produk')
+                    ->columnSpanFull()
+                    ->description('Tautan langsung ke gambar. Foto pertama dipakai di kartu katalog; sisanya jadi galeri di halaman detail.')
+                    ->schema([
+                        Repeater::make('image_urls')
+                            ->label('Foto')
+                            ->simple(TextInput::make('url')
+                                ->required()
+                                ->url()
+                                ->placeholder('https://contoh.com/galaxy-a57.jpg'))
+                            ->defaultItems(0)
+                            ->reorderable()
+                            ->addActionLabel('Tambah foto'),
+                    ]),
                 Section::make('Spesifikasi')
                     ->columnSpanFull()
                     ->description('Semua baris spesifikasi untuk HP ini.')

@@ -11,26 +11,49 @@
             <div class="anim-fade-up mt-[clamp(18px,2.4vw,28px)] flex flex-wrap gap-[clamp(20px,3.4vw,48px)]">
                 <div class="min-w-[min(100%,240px)] flex-[1_1_300px]">
                     <div class="relative grid aspect-4/3 place-items-center rounded-3xl border border-line bg-white shadow-[0_24px_50px_-34px_rgba(12,20,36,.45)]">
-                        <x-device-mock class="h-[78%] w-[34%]" radius="rounded-2xl" inset="inset-[6px]" face-radius="rounded-[11px]" />
+                        <x-phone-photo
+                            :phone="$this->phone"
+                            :src="$this->selectedImage"
+                            mock-class="h-[78%] w-[34%]"
+                            radius="rounded-2xl"
+                            inset="inset-[6px]"
+                            face-radius="rounded-[11px]"
+                        />
 
-                        <span class="absolute bottom-3.5 left-1/2 -translate-x-1/2 font-mono text-[10px] tracking-[.14em] text-faint uppercase">Foto produk</span>
+                        @if ($this->images === [])
+                            <span class="absolute bottom-3.5 left-1/2 -translate-x-1/2 font-mono text-[10px] tracking-[.14em] text-faint uppercase">Foto produk</span>
+                        @endif
                     </div>
 
-                    <div class="mt-3 flex gap-2.5">
-                        @foreach ($thumbnails as $index)
-                            <button
-                                type="button"
-                                wire:key="thumb-{{ $index }}"
-                                wire:click="selectThumb({{ $index }})"
-                                aria-label="Foto produk {{ $index + 1 }}"
-                                @class([
-                                    'block size-[62px] cursor-pointer rounded-[13px] border bg-[linear-gradient(155deg,#f4f6fb,#e4eaf5)]',
-                                    'border-brand' => $thumb === $index,
-                                    'border-line' => $thumb !== $index,
-                                ])
-                            ></button>
-                        @endforeach
-                    </div>
+                    @if (count($this->images) > 1)
+                        <div class="mt-3 flex flex-wrap gap-2.5">
+                            @foreach ($this->images as $index => $image)
+                                <button
+                                    type="button"
+                                    wire:key="thumb-{{ $index }}"
+                                    wire:click="selectThumb({{ $index }})"
+                                    aria-label="Foto produk {{ $index + 1 }}"
+                                    @aria-current="$thumb === $index"
+                                    @class([
+                                        'grid size-[62px] cursor-pointer place-items-center overflow-hidden rounded-[13px] border bg-[linear-gradient(155deg,#f4f6fb,#e4eaf5)]',
+                                        'border-brand' => $thumb === $index,
+                                        'border-line' => $thumb !== $index,
+                                    ])
+                                >
+                                    <img src="{{ $image }}" alt="" loading="lazy" decoding="async" class="max-h-[84%] max-w-[84%] object-contain">
+                                </button>
+                            @endforeach
+                        </div>
+                    @elseif ($this->images === [])
+                        <div class="mt-3 flex gap-2.5">
+                            @foreach ($placeholderThumbnails as $index)
+                                <span
+                                    wire:key="thumb-placeholder-{{ $index }}"
+                                    class="block size-[62px] rounded-[13px] border border-line bg-[linear-gradient(155deg,#f4f6fb,#e4eaf5)]"
+                                ></span>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <div class="min-w-[min(100%,280px)] flex-[1_1_380px]">

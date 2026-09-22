@@ -56,6 +56,7 @@ class Phone extends Model
         'brand_id',
         'slug',
         'name',
+        'image_urls',
         'price',
         'tag',
         'nfc',
@@ -129,6 +130,22 @@ class Phone extends Model
     public function formattedPrice(): string
     {
         return Rupiah::format($this->price);
+    }
+
+    /**
+     * Hotlinked product photos, in gallery order.
+     *
+     * @return list<string>
+     */
+    public function images(): array
+    {
+        return array_values(array_filter($this->image_urls ?? [], filled(...)));
+    }
+
+    /** The shot used on cards and as the gallery's opening frame. */
+    public function primaryImage(): ?string
+    {
+        return $this->images()[0] ?? null;
     }
 
     /** Reads the loaded specs relation — eager-load specs.definition before calling. */
@@ -259,6 +276,7 @@ class Phone extends Model
             'published_at' => 'datetime',
             'pros' => 'array',
             'cons' => 'array',
+            'image_urls' => 'array',
         ];
     }
 }

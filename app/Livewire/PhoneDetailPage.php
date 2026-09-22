@@ -15,8 +15,8 @@ use Livewire\Component;
 
 class PhoneDetailPage extends Component
 {
-    /** How many gallery thumbnails the design shows under the product shot. */
-    private const int THUMBNAIL_COUNT = 4;
+    /** Placeholder squares the design shows when a phone has no photos yet. */
+    private const int PLACEHOLDER_THUMBNAIL_COUNT = 4;
 
     private const int RIVAL_COUNT = 4;
 
@@ -158,15 +158,34 @@ class PhoneDetailPage extends Component
         $this->variant = $index;
     }
 
+    /**
+     * Gallery photos, in the order they were entered.
+     *
+     * @return list<string>
+     */
+    #[Computed]
+    public function images(): array
+    {
+        return $this->phone()->images();
+    }
+
+    /** The frame currently in the big slot, or null when the phone has no photos. */
+    #[Computed]
+    public function selectedImage(): ?string
+    {
+        return $this->images()[$this->thumb] ?? $this->images()[0] ?? null;
+    }
+
     public function selectThumb(int $index): void
     {
-        $this->thumb = $index;
+        // Clamped so a stale or crafted index cannot blank the slot.
+        $this->thumb = max(0, min($index, count($this->images()) - 1));
     }
 
     public function render(): View
     {
         return view('livewire.phone-detail-page', [
-            'thumbnails' => range(0, self::THUMBNAIL_COUNT - 1),
+            'placeholderThumbnails' => range(0, self::PLACEHOLDER_THUMBNAIL_COUNT - 1),
         ])->title($this->phone()->name.' — Spesifikasi & Harga | Bandingin.id');
     }
 
