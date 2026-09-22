@@ -56,8 +56,6 @@
                 </div>
             </article>
         </section>
-
-        <livewire:news-feed />
     @endif
 
     <section class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(40px,5vw,72px)]">
