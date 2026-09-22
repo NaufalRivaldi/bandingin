@@ -2,20 +2,22 @@
 paths:
   - 'app/News/**'
   - 'app/Actions/News/**'
-  - 'app/Console/Commands/ImportTekNews.php'
+  - 'app/Console/Commands/ImportNews.php'
 ---
 
 # News
 
-## External news aggregation
-news_items rows are aggregated from tek.id and are LINK-OUT ONLY: no body is ever fetched, parsed, stored or rendered, and the rows deliberately have no slug so they can never resolve to a page on this site. Public cards must keep target="_blank" rel="noopener nofollow" — without nofollow every card passes SEO equity to a competitor. Keep them out of the /berita article grid, which renders x-article-card and links to route('berita.show').
+## Scraped articles
+Articles with a non-null `source` were scraped from an external site; null source means a human wrote it. Every importer query is scoped Article::scraped() / whereNotNull('source'). The importer must never create, update or delete a row a human wrote — on a slug collision the scraped article takes a numeric suffix instead. ImportScrapedArticlesTest pins this.
 
-Identity is external_id, the final hyphen-separated token of the tek.id URL ("...-b2qbp9uhh"), never the URL itself: tek.id URLs embed the title slug, so an edited headline would create a duplicate row.
+Publishing tek.id's text verbatim was the owner's explicit decision, made after being told it is copyright infringement and carries a duplicate-content ranking risk. Do not silently change it, and keep the two mitigations: the visible "Sumber" credit and the rel=canonical pointing at source_url. The detail page must never show our byline or "Foto: dokumentasi Bandingin.id" on a scraped article — both are false attribution. ScrapedArticlePresentationTest pins this.
 
-The RSS pubDate is "Y-m-d H:i:s" in Asia/Jakarta with NO timezone, and the app runs in UTC. Always parse with CarbonImmutable::createFromFormat(..., 'Asia/Jakarta')->utc(). Carbon::parse() silently shifts every article by 7 hours.
+Sources are rows in scrape_sources, not code: feed URL plus the ArticleCategory its articles become. Adding a site is a row. TekChannel was deleted.
 
-The feed carries no images: its media:content url points at the article, not an image. Images come from the article page's og:image, fetched for NEW items only (ImportScrapedArticles::existingIds partitions them). A failed image fetch must never blank an image already stored.
+RSS pubDate is "Y-m-d H:i:s" in Asia/Jakarta with NO timezone and the app runs in UTC — always CarbonImmutable::createFromFormat(..., 'Asia/Jakarta')->utc(). Carbon::parse() shifts every article by 7 hours.
 
-Feeds return 10 items each; the per-channel sitemap has 50 and also carries news:keywords (tags), and POST /{channel}/more-category walks the deeper archive with a CSRF token scraped from the page. Both are unused, and recorded as the known options if backfill is ever wanted.
+Body extraction uses DOMDocument, which also repairs tek.id's never-closed <p> tags. The junk XPath in FetchArticleContent is load-bearing: RichContentRenderer UNWRAPS unknown elements rather than dropping them, so a surviving div.bacajuga renders as the stray text "Baca Juga" inside the article. RichContentRenderer does handle safety — it strips script, onclick and javascript: hrefs — so no separate sanitiser is needed.
 
-A cold-start import is ~77 sequential requests and takes ~4 minutes; steady state is 7. Adding a new Filament resource also requires adding it to listableResources() in tests/Feature/Filament/ResourcePagesTest.php, which asserts the registered list exhaustively.
+A body-less article is never stored, so the next run retries it. Selectors are tek.id-specific; move them onto the source row when a second site is added.
+
+Adding or removing a Filament resource requires editing creatableResources() / listableResources() in tests/Feature/Filament/ResourcePagesTest.php, which asserts the registered list exhaustively, and giving it a navigation icon no other resource uses.
