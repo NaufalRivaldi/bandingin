@@ -224,16 +224,25 @@
     </section>
 
     <section id="berita" class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(72px,9vw,128px)]">
-        <x-section-heading eyebrow="Redaksi" title="Berita &amp; Ulasan" class="items-baseline!">
+        <x-section-heading eyebrow="Redaksi" title="Berita dan Ulasan" class="items-baseline!">
             <a href="{{ route('berita') }}" class="text-[13.5px] font-semibold">Lihat Semua Berita →</a>
         </x-section-heading>
 
         <div class="mt-[clamp(32px,4vw,56px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] items-start gap-[clamp(32px,5vw,64px)]">
             <article>
                 <a href="{{ route('berita.show', $featured->slug) }}" class="block text-ink hover:text-ink">
-                    <div class="photo-slot relative aspect-16/10 overflow-hidden rounded-[22px]">
-                        <div class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</div>
-                    </div>
+                    @if ($featured->image_url)
+                        <img
+                            src="{{ $featured->image_url }}"
+                            alt="{{ $featured->title }}"
+                            referrerpolicy="no-referrer"
+                            class="aspect-16/10 w-full overflow-hidden rounded-[22px] object-cover"
+                        >
+                    @else
+                        <div class="photo-slot relative aspect-16/10 overflow-hidden rounded-[22px]">
+                            <div class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</div>
+                        </div>
+                    @endif
 
                     <div class="mt-5 font-mono text-[10.5px] tracking-[.14em] text-brand uppercase">{{ $featured->category->value }}</div>
 
@@ -252,7 +261,17 @@
                         wire:key="latest-{{ $article->id }}"
                         class="flex gap-4 border-b border-line py-[18px] text-ink last:border-b-0 hover:text-brand"
                     >
-                        <span class="photo-slot h-[58px] w-[76px] flex-none rounded-xl"></span>
+                        @if ($article->image_url)
+                            <img
+                                src="{{ $article->image_url }}"
+                                alt="{{ $article->title }}"
+                                loading="lazy"
+                                referrerpolicy="no-referrer"
+                                class="h-[58px] w-[76px] flex-none rounded-xl object-cover"
+                            >
+                        @else
+                            <span class="photo-slot h-[58px] w-[76px] flex-none rounded-xl"></span>
+                        @endif
                         <span class="flex-1">
                             <span class="block text-[15px] leading-[1.35] font-semibold tracking-[-.01em]">{{ $article->title }}</span>
                             <span class="mt-[7px] block font-mono text-[11px] text-muted">{{ $article->meta() }}</span>

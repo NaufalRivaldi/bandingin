@@ -2,6 +2,12 @@
     $article = $this->article;
 @endphp
 
+@if ($article->isScraped())
+    @push('head')
+        <link rel="canonical" href="{{ $article->source_url }}">
+    @endpush
+@endif
+
 <div class="bg-white">
     <x-site-nav active="berita" />
 
@@ -20,19 +26,42 @@
         <p class="mt-[18px] text-[clamp(16px,1.4vw,19px)] leading-[1.65] text-muted">{{ $article->excerpt }}</p>
 
         <div class="mt-6 flex flex-wrap items-center gap-3.5 border-y border-line py-4">
-            <span class="grid size-[34px] place-items-center rounded-full border border-line bg-surface font-mono text-[11px] font-semibold text-muted">RA</span>
-            <span class="text-[13.5px] font-medium text-ink">Rizky Adhitama</span>
+            @if ($article->isScraped())
+                <span class="grid size-[34px] place-items-center rounded-full border border-line bg-surface font-mono text-[11px] font-semibold text-muted">↗</span>
+                <span class="text-[13.5px] font-medium text-ink">
+                    Sumber:
+                    <a href="{{ $article->source_url }}" target="_blank" rel="noopener nofollow" class="text-brand hover:underline">{{ $article->source }}</a>
+                </span>
+            @else
+                <span class="grid size-[34px] place-items-center rounded-full border border-line bg-surface font-mono text-[11px] font-semibold text-muted">RA</span>
+                <span class="text-[13.5px] font-medium text-ink">Rizky Adhitama</span>
+            @endif
             <span class="font-mono text-[11.5px] text-muted">{{ $article->dateLong() }}</span>
             <span class="font-mono text-[11.5px] text-muted">{{ $article->read_minutes }} menit baca</span>
         </div>
     </div>
 
     <div class="mx-auto mt-[clamp(26px,3vw,40px)] max-w-[980px] px-[clamp(16px,2.4vw,24px)]">
-        <div class="photo-slot relative aspect-16/9 rounded-[clamp(16px,2vw,26px)]">
-            <div class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</div>
-        </div>
+        @if ($article->image_url)
+            <img
+                src="{{ $article->image_url }}"
+                alt="{{ $article->title }}"
+                referrerpolicy="no-referrer"
+                class="aspect-16/9 w-full rounded-[clamp(16px,2vw,26px)] object-cover"
+            >
+        @else
+            <div class="photo-slot relative aspect-16/9 rounded-[clamp(16px,2vw,26px)]">
+                <div class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</div>
+            </div>
+        @endif
 
-        <div class="mt-2.5 text-[11.5px] text-muted">Foto: dokumentasi Bandingin.id</div>
+        <div class="mt-2.5 text-[11.5px] text-muted">
+            @if ($article->isScraped())
+                Foto: {{ $article->source }}
+            @else
+                Foto: dokumentasi Bandingin.id
+            @endif
+        </div>
     </div>
 
     <article class="mx-auto mt-[clamp(30px,3.6vw,48px)] max-w-[720px] px-[clamp(16px,2.4vw,24px)]">
@@ -60,16 +89,18 @@
             @endforeach
         </div>
 
-        <div class="mt-[30px] flex items-start gap-3.5 border-t border-line pt-[26px]">
-            <span class="grid size-11 flex-none place-items-center rounded-full border border-line bg-surface font-mono text-[13px] font-semibold text-muted">RA</span>
+        @if (! $article->isScraped())
+            <div class="mt-[30px] flex items-start gap-3.5 border-t border-line pt-[26px]">
+                <span class="grid size-11 flex-none place-items-center rounded-full border border-line bg-surface font-mono text-[13px] font-semibold text-muted">RA</span>
 
-            <div>
-                <div class="text-[14.5px] font-semibold">Rizky Adhitama</div>
-                <div class="mt-1.5 max-w-[520px] text-[13.5px] leading-[1.65] text-muted">
-                    Nulis soal HP kelas menengah di Bandingin.id sejak 2024. Semua unit diuji sendiri, harga dicek langsung di marketplace.
+                <div>
+                    <div class="text-[14.5px] font-semibold">Rizky Adhitama</div>
+                    <div class="mt-1.5 max-w-[520px] text-[13.5px] leading-[1.65] text-muted">
+                        Nulis soal HP kelas menengah di Bandingin.id sejak 2024. Semua unit diuji sendiri, harga dicek langsung di marketplace.
+                    </div>
                 </div>
             </div>
-        </div>
+        @endif
     </article>
 
     <section class="mx-auto mt-[clamp(48px,6vw,84px)] max-w-[1140px] px-[clamp(16px,2.4vw,24px)]">

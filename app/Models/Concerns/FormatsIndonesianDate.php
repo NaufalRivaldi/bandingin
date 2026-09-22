@@ -7,7 +7,8 @@ namespace App\Models\Concerns;
 /**
  * Indonesian date presentation for any model with a nullable `published_at`.
  *
- * Shared by Article and NewsItem so the month table exists in exactly one place.
+ * Extracted so the month table lives in exactly one place rather than being
+ * copied into every model that presents a date.
  */
 trait FormatsIndonesianDate
 {

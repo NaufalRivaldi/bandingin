@@ -11,7 +11,17 @@
     href="{{ route('berita.show', $article->slug) }}"
     {{ $attributes->merge(['class' => 'block w-full text-left text-ink transition-transform duration-200 hover:-translate-y-[3px] hover:text-ink']) }}
 >
-    <span class="photo-slot relative block aspect-16/10 rounded-2xl"></span>
+    @if ($article->image_url)
+        <img
+            src="{{ $article->image_url }}"
+            alt="{{ $article->title }}"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            class="aspect-16/10 w-full rounded-2xl object-cover"
+        >
+    @else
+        <span class="photo-slot relative block aspect-16/10 rounded-2xl"></span>
+    @endif
 
     <span class="mt-3.5 flex items-center gap-[9px] font-mono text-[10.5px] tracking-[.13em] uppercase">
         <span class="text-brand">{{ $article->category->value }}</span>

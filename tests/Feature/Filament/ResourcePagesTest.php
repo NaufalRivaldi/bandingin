@@ -6,11 +6,11 @@ use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Brands\BrandResource;
 use App\Filament\Resources\Faqs\FaqResource;
 use App\Filament\Resources\FeaturedMatchups\FeaturedMatchupResource;
-use App\Filament\Resources\NewsItems\NewsItemResource;
 use App\Filament\Resources\NewsletterSubscribers\NewsletterSubscriberResource;
 use App\Filament\Resources\PhoneListings\PhoneListingResource;
 use App\Filament\Resources\Phones\PhoneResource;
 use App\Filament\Resources\Reports\ReportResource;
+use App\Filament\Resources\ScrapeSources\ScrapeSourceResource;
 use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
 use App\Filament\Resources\Stores\StoreResource;
 use App\Filament\Resources\Users\UserResource;
@@ -41,13 +41,13 @@ function creatableResources(): array
         'faqs' => [FaqResource::class],
         'featured matchups' => [FeaturedMatchupResource::class],
         'users' => [UserResource::class],
+        'scrape sources' => [ScrapeSourceResource::class],
     ];
 }
 
 /**
- * Every resource, including the three that are filled from outside the panel —
- * reports arrive from /lapor, subscribers from the footer form, and news items
- * from the news:import-tek command.
+ * Every resource, including the two fed by the public site rather than the
+ * panel — reports arrive from /lapor and subscribers from the footer form.
  *
  * @return array<string, array{class-string}>
  */
@@ -56,7 +56,6 @@ function listableResources(): array
     return creatableResources() + [
         'reports' => [ReportResource::class],
         'newsletter subscribers' => [NewsletterSubscriberResource::class],
-        'news items' => [NewsItemResource::class],
     ];
 }
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\BeritaDetailPage;
 use App\Livewire\BeritaPage;
 use App\Models\Article;
-use App\Models\NewsItem;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -65,61 +64,71 @@ it('prefers same-category articles in the related rail', function (): void {
         ->and($related->first()->category)->toBe($article->category);
 });
 
-it('shows aggregated news in its own section, not the article grid', function (): void {
-    $item = NewsItem::factory()->create([
-        'title' => 'Kabar dari luar',
-        'url' => 'https://www.tek.id/gadget/kabar-b2qbp9uhh',
-    ]);
+it('shows only the first page of articles', function (): void {
+    Article::factory()->count(30)->create();
 
-    $response = $this->get(route('berita'));
+    $component = Livewire::test(BeritaPage::class);
 
-    $response->assertSuccessful()
-        ->assertSee('Kabar Teknologi')
-        ->assertSee($item->url);
-
-    // The item must not have acquired a page on this site.
-    $this->get('/berita/kabar-b2qbp9uhh')->assertNotFound();
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE);
 });
 
-it('places aggregated news above the article grid', function (): void {
-    NewsItem::factory()->create();
+it('loads another page when asked for more', function (): void {
+    Article::factory()->count(30)->create();
 
-    $html = Livewire::test(BeritaPage::class)->html();
+    $component = Livewire::test(BeritaPage::class)->call('loadMore');
 
-    expect(strpos($html, 'Kabar Teknologi'))->toBeLessThan(strpos($html, 'Terbaru'));
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE * 2);
 });
 
-it('hides aggregated news when a category filter is active', function (): void {
-    // The chips scope the page to our own taxonomy, so external cards must not
-    // push a filtered article list down. Same rule as the featured hero.
-    NewsItem::factory()->create(['title' => 'Kabar dari luar']);
+it('never returns more articles than exist', function (): void {
+    Article::query()->delete();
+    Article::factory()->count(4)->create();
 
-    Livewire::test(BeritaPage::class)
-        ->assertSee('Kabar Teknologi')
+    $component = Livewire::test(BeritaPage::class)->call('loadMore')->call('loadMore');
+
+    // Four articles, one of which is the featured hero.
+    expect($component->instance()->articles())->toHaveCount(3);
+});
+
+it('hides the load-more button once everything is shown', function (): void {
+    Article::query()->delete();
+    Article::factory()->count(3)->create();
+
+    Livewire::test(BeritaPage::class)->assertDontSee('Muat lebih banyak');
+});
+
+it('shows the load-more button while articles remain', function (): void {
+    Article::factory()->count(30)->create();
+
+    Livewire::test(BeritaPage::class)->assertSee('Muat lebih banyak');
+});
+
+it('reports the total, not just the page currently shown', function (): void {
+    Article::query()->delete();
+    Article::factory()->count(21)->create();
+
+    // Twenty-one articles minus the featured hero. The tally answers "how big
+    // is this list", which is why it does not shrink to the page size.
+    Livewire::test(BeritaPage::class)->assertSee('20 artikel');
+});
+
+it('starts again from the first page when the category changes', function (): void {
+    Article::factory()->count(30)->create();
+
+    $component = Livewire::test(BeritaPage::class)
+        ->call('loadMore')
         ->call('setCategory', 'Panduan')
-        ->assertDontSee('Kabar Teknologi')
-        ->assertDontSee('Kabar dari luar');
+        ->call('setCategory', BeritaPage::ALL_CATEGORIES);
+
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE);
 });
 
-it('keeps aggregated news out of the article count', function (): void {
-    // The grid's "N artikel" tally counts Articles only. Asserting it is
-    // unchanged by news items avoids restating BeritaPage's own rule that the
-    // featured article is dropped from the grid.
-    $countBefore = articleTallyOnBeritaPage();
+it('does not query every article just to count them', function (): void {
+    Article::factory()->count(30)->create();
 
-    NewsItem::factory()->count(5)->create();
+    $component = Livewire::test(BeritaPage::class);
 
-    expect(articleTallyOnBeritaPage())->toBe($countBefore);
+    // The grid must hold one page, not the whole table, however big it gets.
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE)
+        ->and($component->instance()->total())->toBe(30 + 12 - 1);
 });
-
-/** The "N artikel" number rendered above the article grid. */
-function articleTallyOnBeritaPage(): int
-{
-    $html = Livewire::test(BeritaPage::class)->html();
-
-    expect($html)->toMatch('/(\d+) artikel/');
-
-    preg_match('/(\d+) artikel/', $html, $matches);
-
-    return (int) $matches[1];
-}
