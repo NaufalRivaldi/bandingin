@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             ArticleSeeder::class,
             FaqSeeder::class,
             FeaturedMatchupSeeder::class,
+            ScrapeSourceSeeder::class,
         ]);
     }
 }
