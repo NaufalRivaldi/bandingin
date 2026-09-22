@@ -30,9 +30,18 @@
         <section class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(32px,4vw,56px)]">
             <article class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] items-center gap-[clamp(24px,3.4vw,48px)]">
                 <a href="{{ route('berita.show', $this->featured->slug) }}" class="block w-full">
-                    <span class="photo-slot relative block aspect-16/10 rounded-[22px]">
-                        <span class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</span>
-                    </span>
+                    @if ($this->featured->image_url)
+                        <img
+                            src="{{ $this->featured->image_url }}"
+                            alt="{{ $this->featured->title }}"
+                            referrerpolicy="no-referrer"
+                            class="aspect-16/10 w-full rounded-[22px] object-cover"
+                        >
+                    @else
+                        <span class="photo-slot relative block aspect-16/10 rounded-[22px]">
+                            <span class="absolute inset-0 grid place-items-center font-mono text-[10.5px] tracking-[.14em] text-faint uppercase">Foto artikel</span>
+                        </span>
+                    @endif
                 </a>
 
                 <div>
