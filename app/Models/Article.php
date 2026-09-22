@@ -27,6 +27,10 @@ class Article extends Model
         'tags',
         'read_minutes',
         'published_at',
+        'source',
+        'source_url',
+        'external_id',
+        'image_url',
     ];
 
     public function meta(): string
@@ -38,6 +42,24 @@ class Article extends Model
     public function scopePublished(Builder $query): void
     {
         $query->whereNotNull('published_at');
+    }
+
+    /** @param  Builder<$this>  $query */
+    public function scopeScraped(Builder $query): void
+    {
+        $query->whereNotNull('source');
+    }
+
+    /** @param  Builder<$this>  $query */
+    public function scopeOwn(Builder $query): void
+    {
+        $query->whereNull('source');
+    }
+
+    /** Scraped articles carry a credit line and a canonical tag; ours do not. */
+    public function isScraped(): bool
+    {
+        return $this->source !== null;
     }
 
     public function getRouteKeyName(): string
