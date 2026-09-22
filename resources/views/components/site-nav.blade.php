@@ -29,8 +29,7 @@
         'mx-auto flex max-w-[1140px] items-center justify-between gap-3.5 px-[clamp(16px,2.4vw,24px)] py-[clamp(11px,1.4vw,14px)]' => ! $pill,
     ])>
         <a href="{{ route('home') }}" class="flex flex-none items-center gap-[9px] text-ink hover:text-ink">
-            <span class="grid size-7 place-items-center rounded-[9px] bg-brand font-mono text-[11px] font-semibold tracking-[-.02em] text-white">VS</span>
-            <span class="font-display text-[clamp(15.5px,1.6vw,17px)] font-extrabold tracking-[-.03em] whitespace-nowrap">Bandingin<span class="text-brand">.id</span></span>
+            <x-site-logo />
         </a>
 
         <div class="hidden items-center gap-[clamp(14px,1.8vw,26px)] text-[14.5px] font-medium nav:flex">

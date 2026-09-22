@@ -112,3 +112,10 @@ it('falls back to the placeholder when an article has no image', function (): vo
 
     $this->get(route('home'))->assertSee('photo-slot');
 });
+
+it('sends the hero call to action to the comparison page', function (): void {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('href="'.route('bandingkan').'"', escape: false)
+        ->assertSee('Bandingkan Sekarang');
+});

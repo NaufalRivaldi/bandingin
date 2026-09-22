@@ -72,14 +72,12 @@
                         @endforeach
                     </div>
 
-                    <button
-                        type="button"
-                        wire:click="closePickers"
-                        x-on:click="$nextTick(() => document.getElementById('duel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))"
-                        class="mx-auto mt-4 block w-full max-w-[320px] cursor-pointer rounded-[14px] border-0 bg-brand px-6 py-[17px] font-sans text-base font-semibold text-white shadow-[0_12px_26px_rgba(37,99,235,.3)] transition-[background,transform] duration-200 hover:-translate-y-px hover:bg-brand-dark"
+                    <a
+                        href="{{ route('bandingkan') }}"
+                        class="mx-auto mt-4 block w-full max-w-[320px] rounded-[14px] bg-brand px-6 py-[17px] text-center font-sans text-base font-semibold text-white shadow-[0_12px_26px_rgba(37,99,235,.3)] transition-[background,transform] duration-200 hover:-translate-y-px hover:bg-brand-dark hover:text-white"
                     >
                         Bandingkan Sekarang
-                    </button>
+                    </a>
 
                     <div class="mt-[22px] flex flex-wrap items-center justify-center gap-2">
                         <span class="text-xs font-medium text-muted">Populer:</span>

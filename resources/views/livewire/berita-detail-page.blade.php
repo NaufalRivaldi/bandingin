@@ -103,6 +103,12 @@
         @endif
     </article>
 
+    <x-disqus-comments
+        :identifier="$article->slug"
+        :url="route('berita.show', $article->slug)"
+        :title="$article->title"
+    />
+
     <section class="mx-auto mt-[clamp(48px,6vw,84px)] max-w-[1140px] px-[clamp(16px,2.4vw,24px)]">
         <div class="flex flex-wrap items-baseline justify-between gap-3.5 border-b border-line pb-[18px]">
             <h2 class="font-display text-[clamp(20px,2.2vw,26px)] font-extrabold tracking-[-.026em]">Artikel Terkait</h2>

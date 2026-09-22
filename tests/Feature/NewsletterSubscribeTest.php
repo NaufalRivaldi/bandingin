@@ -45,3 +45,24 @@ it('does not duplicate an address that already subscribed', function (): void {
 
     expect(NewsletterSubscriber::whereEmail('pembaca@bandingin.test')->count())->toBe(1);
 });
+
+it('treats a differently cased address as the same subscriber', function (): void {
+    NewsletterSubscriber::create(['email' => 'pembaca@bandingin.test']);
+
+    Livewire::test(NewsletterSubscribe::class)
+        ->set('email', '  Pembaca@Bandingin.TEST ')
+        ->call('subscribe')
+        ->assertHasNoErrors();
+
+    expect(NewsletterSubscriber::count())->toBe(1);
+});
+
+it('offers a fresh form after a successful subscription', function (): void {
+    Livewire::test(NewsletterSubscribe::class)
+        ->set('email', 'pembaca@bandingin.test')
+        ->call('subscribe')
+        ->assertSet('subscribed', true)
+        ->call('subscribeAnother')
+        ->assertSet('subscribed', false)
+        ->assertSee('Satu email per minggu.');
+});

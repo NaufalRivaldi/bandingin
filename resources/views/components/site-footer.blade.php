@@ -47,7 +47,7 @@
 
         <div class="mt-[clamp(28px,4vw,52px)] flex flex-wrap items-center justify-between gap-3.5 border-t border-line pt-5 text-[12.5px] text-muted">
             <div class="flex items-center gap-[9px]">
-                <span class="grid size-[22px] place-items-center rounded-[7px] bg-brand font-mono text-[9px] font-semibold text-white">VS</span>
+                <x-site-logo :size="22" :wordmark="false" />
                 © {{ now()->year }} Bandingin.id
             </div>
             <div class="flex flex-wrap items-center gap-x-[18px] gap-y-2.5">
