@@ -10,6 +10,7 @@ use App\Filament\Resources\NewsletterSubscribers\NewsletterSubscriberResource;
 use App\Filament\Resources\PhoneListings\PhoneListingResource;
 use App\Filament\Resources\Phones\PhoneResource;
 use App\Filament\Resources\Reports\ReportResource;
+use App\Filament\Resources\ScrapeSources\ScrapeSourceResource;
 use App\Filament\Resources\SpecDefinitions\SpecDefinitionResource;
 use App\Filament\Resources\Stores\StoreResource;
 use App\Filament\Resources\Users\UserResource;
@@ -40,6 +41,7 @@ function creatableResources(): array
         'faqs' => [FaqResource::class],
         'featured matchups' => [FeaturedMatchupResource::class],
         'users' => [UserResource::class],
+        'scrape sources' => [ScrapeSourceResource::class],
     ];
 }
 
