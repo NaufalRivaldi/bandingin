@@ -56,6 +56,8 @@
                 </div>
             </article>
         </section>
+
+        <livewire:news-feed />
     @endif
 
     <section class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(40px,5vw,72px)]">
@@ -77,8 +79,6 @@
             >Muat lebih banyak</button>
         </div>
     </section>
-
-    <livewire:news-feed />
 
     <section class="mx-auto mt-[clamp(56px,7vw,96px)] max-w-[1140px] px-[clamp(16px,2.4vw,24px)]">
         <div class="rounded-3xl border border-line bg-surface p-[clamp(24px,3vw,38px)]">

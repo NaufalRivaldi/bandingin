@@ -81,6 +81,26 @@ it('shows aggregated news in its own section, not the article grid', function ()
     $this->get('/berita/kabar-b2qbp9uhh')->assertNotFound();
 });
 
+it('places aggregated news above the article grid', function (): void {
+    NewsItem::factory()->create();
+
+    $html = Livewire::test(BeritaPage::class)->html();
+
+    expect(strpos($html, 'Kabar Teknologi'))->toBeLessThan(strpos($html, 'Terbaru'));
+});
+
+it('hides aggregated news when a category filter is active', function (): void {
+    // The chips scope the page to our own taxonomy, so external cards must not
+    // push a filtered article list down. Same rule as the featured hero.
+    NewsItem::factory()->create(['title' => 'Kabar dari luar']);
+
+    Livewire::test(BeritaPage::class)
+        ->assertSee('Kabar Teknologi')
+        ->call('setCategory', 'Panduan')
+        ->assertDontSee('Kabar Teknologi')
+        ->assertDontSee('Kabar dari luar');
+});
+
 it('keeps aggregated news out of the article count', function (): void {
     // The grid's "N artikel" tally counts Articles only. Asserting it is
     // unchanged by news items avoids restating BeritaPage's own rule that the
