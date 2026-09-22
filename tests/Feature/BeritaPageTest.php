@@ -63,3 +63,72 @@ it('prefers same-category articles in the related rail', function (): void {
         ->and($related->pluck('id')->all())->not->toContain($article->id)
         ->and($related->first()->category)->toBe($article->category);
 });
+
+it('shows only the first page of articles', function (): void {
+    Article::factory()->count(30)->create();
+
+    $component = Livewire::test(BeritaPage::class);
+
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE);
+});
+
+it('loads another page when asked for more', function (): void {
+    Article::factory()->count(30)->create();
+
+    $component = Livewire::test(BeritaPage::class)->call('loadMore');
+
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE * 2);
+});
+
+it('never returns more articles than exist', function (): void {
+    Article::query()->delete();
+    Article::factory()->count(4)->create();
+
+    $component = Livewire::test(BeritaPage::class)->call('loadMore')->call('loadMore');
+
+    // Four articles, one of which is the featured hero.
+    expect($component->instance()->articles())->toHaveCount(3);
+});
+
+it('hides the load-more button once everything is shown', function (): void {
+    Article::query()->delete();
+    Article::factory()->count(3)->create();
+
+    Livewire::test(BeritaPage::class)->assertDontSee('Muat lebih banyak');
+});
+
+it('shows the load-more button while articles remain', function (): void {
+    Article::factory()->count(30)->create();
+
+    Livewire::test(BeritaPage::class)->assertSee('Muat lebih banyak');
+});
+
+it('reports the total, not just the page currently shown', function (): void {
+    Article::query()->delete();
+    Article::factory()->count(21)->create();
+
+    // Twenty-one articles minus the featured hero. The tally answers "how big
+    // is this list", which is why it does not shrink to the page size.
+    Livewire::test(BeritaPage::class)->assertSee('20 artikel');
+});
+
+it('starts again from the first page when the category changes', function (): void {
+    Article::factory()->count(30)->create();
+
+    $component = Livewire::test(BeritaPage::class)
+        ->call('loadMore')
+        ->call('setCategory', 'Panduan')
+        ->call('setCategory', BeritaPage::ALL_CATEGORIES);
+
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE);
+});
+
+it('does not query every article just to count them', function (): void {
+    Article::factory()->count(30)->create();
+
+    $component = Livewire::test(BeritaPage::class);
+
+    // The grid must hold one page, not the whole table, however big it gets.
+    expect($component->instance()->articles())->toHaveCount(BeritaPage::PER_PAGE)
+        ->and($component->instance()->total())->toBe(30 + 12 - 1);
+});
