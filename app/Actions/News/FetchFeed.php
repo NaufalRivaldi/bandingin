@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\News;
 
+use App\Models\ScrapeSource;
 use App\News\ScrapedArticle;
-use App\News\TekChannel;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Http;
@@ -14,21 +14,22 @@ use RuntimeException;
 use SimpleXMLElement;
 
 /**
- * Fetches and parses one tek.id RSS channel.
+ * Fetches and parses one source's RSS feed.
  *
- * Touches no database, so it is testable with Http::fake() alone. A whole-feed
- * problem throws and lets the caller fail that channel; a single malformed item
- * is skipped so one bad entry cannot cost us the other nine.
+ * Touches no database beyond reading the source row, so it is testable with
+ * Http::fake() alone. A whole-feed problem throws and lets the caller fail that
+ * source; a single malformed item is skipped so one bad entry cannot cost us
+ * the other nine.
  */
-final class FetchTekChannel
+final class FetchFeed
 {
     /** @return list<ScrapedArticle> */
-    public function handle(TekChannel $channel): array
+    public function handle(ScrapeSource $source): array
     {
         $body = Http::withUserAgent((string) config('services.tek.user_agent'))
             ->timeout(15)
             ->retry(2, 500)
-            ->get($channel->feedUrl())
+            ->get($source->feed_url)
             ->throw()
             ->body();
 
@@ -39,14 +40,14 @@ final class FetchTekChannel
 
         if ($xml === false) {
             throw new RuntimeException(
-                "tek.id {$channel->value} feed is not valid XML (".strlen($body).' bytes).'
+                "Feed {$source->name} is not valid XML (".strlen($body).' bytes).'
             );
         }
 
         $articles = [];
 
         foreach ($xml->channel->item as $item) {
-            $article = $this->toArticle($channel, $item);
+            $article = $this->toArticle($item);
 
             if ($article instanceof ScrapedArticle) {
                 $articles[] = $article;
@@ -56,7 +57,7 @@ final class FetchTekChannel
         return $articles;
     }
 
-    private function toArticle(TekChannel $channel, SimpleXMLElement $item): ?ScrapedArticle
+    private function toArticle(SimpleXMLElement $item): ?ScrapedArticle
     {
         $url = trim((string) $item->link);
         $title = trim((string) $item->title);
@@ -69,7 +70,6 @@ final class FetchTekChannel
 
         return new ScrapedArticle(
             externalId: $externalId,
-            channel: $channel,
             title: html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             excerpt: html_entity_decode(trim((string) $item->description), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             url: $url,
