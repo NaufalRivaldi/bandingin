@@ -34,6 +34,7 @@
                         <img
                             src="{{ $this->featured->image_url }}"
                             alt="{{ $this->featured->title }}"
+                            title="{{ $this->featured->title }}"
                             referrerpolicy="no-referrer"
                             class="aspect-16/10 w-full rounded-[22px] object-cover"
                         >
@@ -73,11 +74,21 @@
             <span class="font-mono text-[11.5px] text-muted">{{ $this->total }} artikel</span>
         </div>
 
-        <div class="mt-[clamp(24px,3vw,36px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-[clamp(18px,2.2vw,28px)]">
-            @foreach ($this->articles as $article)
-                <x-article-card wire:key="article-{{ $article->id }}" :article="$article" />
-            @endforeach
-        </div>
+        @if ($this->total > 0)
+            <div class="mt-[clamp(24px,3vw,36px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-[clamp(18px,2.2vw,28px)]">
+                @foreach ($this->articles as $article)
+                    <x-article-card wire:key="article-{{ $article->id }}" :article="$article" />
+                @endforeach
+            </div>
+        @else
+            <div class="mt-6 rounded-[20px] border border-dashed border-line-strong px-[clamp(16px,2.4vw,24px)] py-[clamp(34px,5vw,60px)] text-center">
+                <div class="font-display text-[19px] font-extrabold tracking-[-.02em]">Belum ada artikel</div>
+
+                <div class="mx-auto mt-2.5 max-w-[380px] text-sm leading-[1.55] text-muted">
+                    {{ $this->emptyMessage }}
+                </div>
+            </div>
+        @endif
 
         @if ($this->hasMore)
             <div class="mt-[clamp(36px,4vw,56px)] flex items-center justify-center gap-2.5">

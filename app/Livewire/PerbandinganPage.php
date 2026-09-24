@@ -6,19 +6,20 @@ namespace App\Livewire;
 
 use App\Actions\CompareDuel;
 use App\Duel\DuelResult;
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Phone;
 use App\Models\PhoneListing;
 use App\Money\Rupiah;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Bandingkan HP — Bandingin.id')]
 class PerbandinganPage extends Component
 {
+    use SetsPageSeo;
+
     /** How many suggestions the picker dropdown shows. */
     private const int SUGGESTION_LIMIT = 6;
 
@@ -161,6 +162,9 @@ class PerbandinganPage extends Component
 
     public function render(): View
     {
+        $this->seo('Bandingkan HP', 'Adu dua HP baris demi baris: chipset, layar, kamera, baterai, dan harga. Kami tandai mana yang menang di setiap spesifikasi.');
+        $this->noindexWhenFiltered('left', 'right');
+
         return view('livewire.perbandingan-page', [
             'related' => self::RELATED,
             'specCount' => array_sum(array_map(

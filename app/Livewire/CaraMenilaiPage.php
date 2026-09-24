@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsPageSeo;
 use Illuminate\View\View;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Cara kami menilai — Bandingin.id')]
 class CaraMenilaiPage extends Component
 {
+    use SetsPageSeo;
+
     /** Highest weight in the list; the bars are drawn relative to it. */
     private const int MAX_WEIGHT = 25;
 
     public function render(): View
     {
+        $this->seo('Cara kami menilai', 'Metodologi skor Bandingin.id: bobot tiap kategori, langkah pengujian, dan hal-hal yang sengaja kami kecualikan.');
+
         return view('livewire.cara-menilai-page', [
             'weights' => self::weights(),
             'maxWeight' => self::MAX_WEIGHT,

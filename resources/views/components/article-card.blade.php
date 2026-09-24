@@ -15,6 +15,7 @@
         <img
             src="{{ $article->image_url }}"
             alt="{{ $article->title }}"
+            title="{{ $article->title }}"
             loading="lazy"
             referrerpolicy="no-referrer"
             class="aspect-16/10 w-full rounded-2xl object-cover"

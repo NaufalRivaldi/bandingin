@@ -5,17 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Enums\FaqTopic;
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Faq;
+use App\Seo\FaqStructuredData;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Pusat bantuan — Bandingin.id')]
 class FaqPage extends Component
 {
+    use SetsPageSeo;
+
     public const string ALL_TOPICS = 'Semua';
 
     /**
@@ -58,6 +60,10 @@ class FaqPage extends Component
 
     public function render(): View
     {
+        $this->seo('Pusat bantuan', 'Jawaban atas pertanyaan yang paling sering masuk soal data harga, cara penilaian, dan penggunaan Bandingin.id.');
+
+        app(FaqStructuredData::class)->handle($this->faqs());
+
         return view('livewire.faq-page', [
             'steps' => self::STEPS,
             'topics' => [self::ALL_TOPICS, ...FaqTopic::values()],

@@ -24,10 +24,13 @@
 
     <span class="font-mono {{ $compact ? 'text-sm font-medium' : 'text-base font-semibold' }} whitespace-nowrap">{{ $seller->formattedPrice() }}</span>
 
-    <x-affiliate-link
-        :label="$compact ? 'Cek' : 'Cek Harga'"
-        :arrow="false"
-        :href="$seller->product_url"
-        class="flex-none {{ $compact ? 'px-3.5 py-2.5' : 'px-[18px] py-[11px] text-[13px]' }}"
-    />
+    @if (filled($seller->product_url))
+        <x-affiliate-link
+            :label="$compact ? 'Cek' : 'Cek Harga'"
+            :arrow="false"
+            :external="true"
+            :href="$seller->product_url"
+            class="flex-none {{ $compact ? 'px-3.5 py-2.5' : 'px-[18px] py-[11px] text-[13px]' }}"
+        />
+    @endif
 </div>

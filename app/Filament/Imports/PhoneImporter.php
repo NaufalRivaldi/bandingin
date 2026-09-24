@@ -61,6 +61,16 @@ class PhoneImporter extends Importer
     }
 
     /**
+     * Imported phones go live immediately. A row carrying its own publish date
+     * keeps it; a blank cell never unpublishes a phone, because the column
+     * ignores blank state.
+     */
+    protected function beforeSave(): void
+    {
+        $this->record->published_at ??= now();
+    }
+
+    /**
      * The relation rows are packed into single cells, so they cannot be filled
      * onto the phone and are written here instead, once it has an id.
      */
@@ -158,7 +168,8 @@ class PhoneImporter extends Importer
                 ->rules(['array'])
                 ->example('Pengisian daya 45W kalah cepat'),
             ImportColumn::make('published_at')
-                ->helperText('Kosongkan untuk menyimpan sebagai draf.')
+                ->helperText('Kosongkan untuk terbit otomatis saat diimpor.')
+                ->ignoreBlankState()
                 ->rules(['nullable', 'date'])
                 ->example('2025-03-05 09:00:00'),
         ];

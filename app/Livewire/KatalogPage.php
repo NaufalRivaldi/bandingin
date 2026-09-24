@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Brand;
 use App\Models\Phone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Katalog HP — Bandingin.id')]
 class KatalogPage extends Component
 {
+    use SetsPageSeo;
+
     /** How many phones the sticky duel bar accepts before it starts dropping the oldest pick. */
     private const int MAX_PICKS = 2;
 
@@ -163,6 +164,9 @@ class KatalogPage extends Component
 
     public function render(): View
     {
+        $this->seo('Katalog HP', 'Telusuri katalog HP di Indonesia. Saring berdasarkan merek, rentang harga, RAM, layar, baterai, dan NFC, lalu bandingkan pilihanmu berdampingan.');
+        $this->noindexWhenFiltered('q', 'harga', 'merek', 'spek', 'urut');
+
         $specFilters = Phone::SPEC_FILTERS;
 
         foreach (Phone::FLAG_FILTERS as $id => $label) {

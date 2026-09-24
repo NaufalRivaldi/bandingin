@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 use App\Livewire\BeritaDetailPage;
 use App\Livewire\BeritaPage;
 use App\Livewire\CaraMenilaiPage;
@@ -28,3 +30,10 @@ Route::livewire('/lapor', LaporPage::class)->name('lapor');
 Route::livewire('/legal', LegalPage::class)->name('legal');
 Route::livewire('/cara-kami-menilai', CaraMenilaiPage::class)->name('cara-menilai');
 Route::livewire('/sumber-data-harga', SumberHargaPage::class)->name('sumber-harga');
+
+Route::get('/robots.txt', RobotsController::class)->name('robots');
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
+Route::get('/sitemap-phones.xml', [SitemapController::class, 'phones'])->name('sitemap.phones');
+Route::get('/sitemap-articles.xml', [SitemapController::class, 'articles'])->name('sitemap.articles');

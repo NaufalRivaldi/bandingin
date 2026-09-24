@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Enums\ReportType;
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Livewire\Forms\ReportForm;
 use Illuminate\View\View;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Bantu kami akurat — Bandingin.id')]
 class LaporPage extends Component
 {
+    use SetsPageSeo;
+
     #[Url(as: 'jenis')]
     public ReportType $type = ReportType::Harga;
 
@@ -64,6 +65,8 @@ class LaporPage extends Component
 
     public function render(): View
     {
+        $this->seo('Bantu kami akurat', 'Menemukan harga atau spesifikasi yang keliru? Laporkan ke kami dan tim akan memeriksanya.');
+
         return view('livewire.lapor-page', [
             'types' => ReportType::cases(),
             'stores' => self::STORES,

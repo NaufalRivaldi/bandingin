@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Actions\RenderArticleBody;
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Article;
+use App\Seo\ArticleStructuredData;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
@@ -14,6 +16,8 @@ use Livewire\Component;
 
 class BeritaDetailPage extends Component
 {
+    use SetsPageSeo;
+
     /** How many articles the related rail shows. */
     private const int RELATED_COUNT = 3;
 
@@ -56,10 +60,14 @@ class BeritaDetailPage extends Component
             ->get();
     }
 
-    /** The page title is per-article, so it cannot be set with the #[Title] attribute. */
     public function render(): View
     {
-        return view('livewire.berita-detail-page')
-            ->title($this->article()->title.' — Bandingin.id');
+        $article = $this->article();
+
+        $this->seo($article->title, $article->excerpt);
+
+        app(ArticleStructuredData::class)->handle($article);
+
+        return view('livewire.berita-detail-page');
     }
 }

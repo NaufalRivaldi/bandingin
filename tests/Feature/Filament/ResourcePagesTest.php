@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Ads\AdResource;
 use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Brands\BrandResource;
 use App\Filament\Resources\Faqs\FaqResource;
@@ -47,7 +48,9 @@ function creatableResources(): array
 
 /**
  * Every resource, including the two fed by the public site rather than the
- * panel — reports arrive from /lapor and subscribers from the footer form.
+ * panel — reports arrive from /lapor and subscribers from the footer form —
+ * and ads, which are managed inline on their list page and so have no
+ * separate create page.
  *
  * @return array<string, array{class-string}>
  */
@@ -56,6 +59,7 @@ function listableResources(): array
     return creatableResources() + [
         'reports' => [ReportResource::class],
         'newsletter subscribers' => [NewsletterSubscriberResource::class],
+        'ads' => [AdResource::class],
     ];
 }
 

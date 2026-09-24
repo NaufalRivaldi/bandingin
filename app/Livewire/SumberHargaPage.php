@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsPageSeo;
 use Illuminate\View\View;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Sumber data harga — Bandingin.id')]
 class SumberHargaPage extends Component
 {
+    use SetsPageSeo;
+
     public function render(): View
     {
+        $this->seo('Sumber data harga', 'Dari mana angka harga di Bandingin.id berasal, seberapa sering diperbarui, dan aturan yang kami pakai saat menampilkannya.');
+
         return view('livewire.sumber-harga-page', [
             'sources' => self::sources(),
             'rules' => self::rules(),

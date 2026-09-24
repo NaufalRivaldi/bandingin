@@ -95,8 +95,28 @@ it('updates the existing phone when the slug matches instead of duplicating', fu
         ->and($phone->name)->toBe('Galaxy A56 5G (2025)');
 });
 
-it('leaves a phone as a draft when published_at is blank', function (): void {
-    expect(importRow(phoneRow(['published_at' => '']))->published_at)->toBeNull();
+it('publishes a phone automatically when published_at is blank', function (): void {
+    expect(importRow(phoneRow(['published_at' => '']))->published_at)->not->toBeNull();
+});
+
+it('keeps an explicit publish date from the CSV', function (): void {
+    expect(importRow(phoneRow(['published_at' => '2025-03-05 09:00:00']))->published_at->toDateString())
+        ->toBe('2025-03-05');
+});
+
+it('does not move an existing publish date when the column is blank', function (): void {
+    importRow(phoneRow(['published_at' => '2025-03-05 09:00:00']));
+    $phone = importRow(phoneRow(['published_at' => '', 'price' => '4999000']));
+
+    expect($phone->published_at->toDateString())->toBe('2025-03-05')
+        ->and($phone->price)->toBe(4999000);
+});
+
+it('republishes a phone that was drafted in the admin panel', function (): void {
+    importRow(phoneRow());
+    Phone::where('slug', 'galaxy-a56-5g')->update(['published_at' => null]);
+
+    expect(importRow(phoneRow(['published_at' => '']))->published_at)->not->toBeNull();
 });
 
 it('resolves the brand by slug as well as by name', function (): void {

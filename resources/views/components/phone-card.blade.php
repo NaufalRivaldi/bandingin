@@ -21,7 +21,7 @@
     <div class="relative grid aspect-4/3 place-items-center rounded-[15px] border border-line-soft bg-[linear-gradient(160deg,#f4f6fb,#e4eaf5)]">
         <x-phone-photo :phone="$phone" mock-class="h-[74%] w-[30%]" />
 
-        @if ($phone->tag !== '')
+        @if (filled($phone->tag))
             <span class="absolute top-2.5 left-2.5 rounded-full bg-ink px-2.5 py-1 font-sans text-[10.5px] font-semibold text-white">{{ $phone->tag }}</span>
         @endif
     </div>

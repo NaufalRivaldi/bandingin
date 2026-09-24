@@ -29,6 +29,25 @@ it('swaps both phones when a popular matchup is picked', function (): void {
         ->assertSee('Galaxy S25');
 });
 
+it('carries the chosen pair into the compare page link', function (): void {
+    $target = route('bandingkan', ['left' => 'ip16', 'right' => 's25']);
+
+    Livewire::test(HomePage::class)
+        ->call('setMatchup', 'ip16', 's25')
+        ->assertSee($target);
+});
+
+it('points the compare link at the phones actually on screen when a slug is unknown', function (): void {
+    // resolve() falls back to the first published phone, so the link must follow
+    // what the duel card shows rather than the bogus slug.
+    $page = Livewire::test(HomePage::class)->set('left', 'tidak-ada');
+
+    $shown = $page->instance()->leftPhone()->slug;
+
+    $page->assertSee(route('bandingkan', ['left' => $shown, 'right' => 'note14pro']))
+        ->assertDontSee('left=tidak-ada', escape: false);
+});
+
 it('filters picker suggestions by the typed query', function (): void {
     // Asserted against the suggestion collection rather than rendered copy: matchup
     // shortcut labels are derived from full phone names, so they also mention phones.

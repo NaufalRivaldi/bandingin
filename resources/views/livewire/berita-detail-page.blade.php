@@ -2,12 +2,6 @@
     $article = $this->article;
 @endphp
 
-@if ($article->isScraped())
-    @push('head')
-        <link rel="canonical" href="{{ $article->source_url }}">
-    @endpush
-@endif
-
 <div class="bg-white">
     <x-site-nav active="berita" />
 
@@ -46,6 +40,7 @@
             <img
                 src="{{ $article->image_url }}"
                 alt="{{ $article->title }}"
+                title="{{ $article->title }}"
                 referrerpolicy="no-referrer"
                 class="aspect-16/9 w-full rounded-[clamp(16px,2vw,26px)] object-cover"
             >

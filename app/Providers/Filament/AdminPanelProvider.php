@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
                 'Katalog',
                 'Konten',
                 'Operasional',
+                'Iklan',
             ])
             ->colors([
                 'primary' => Color::Amber,

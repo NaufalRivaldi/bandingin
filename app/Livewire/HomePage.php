@@ -6,18 +6,20 @@ namespace App\Livewire;
 
 use App\Actions\CompareDuel;
 use App\Duel\DuelResult;
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Article;
 use App\Models\FeaturedMatchup;
 use App\Models\Phone;
+use App\Seo\SiteStructuredData;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Bandingin.id — Jangan Beli HP Sebelum Dibandingkan')]
 class HomePage extends Component
 {
+    use SetsPageSeo;
+
     /** How many suggestions the picker dropdown shows. */
     private const int SUGGESTION_LIMIT = 6;
 
@@ -115,6 +117,10 @@ class HomePage extends Component
 
     public function render(): View
     {
+        $this->seo('Jangan Beli HP Sebelum Dibandingkan', 'Adu dua HP berdampingan: spesifikasi, harga, dan skor. Kami tandai pemenang di tiap baris supaya kamu tahu mana yang benar-benar layak dibeli.');
+
+        app(SiteStructuredData::class)->handle();
+
         $articles = Article::published()->latest('published_at')->take(5)->get();
 
         return view('livewire.home-page', [

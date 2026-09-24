@@ -12,4 +12,4 @@ Derived data goes in #[Computed] methods (read in Blade as $this->name). Filter/
 
 Trap: `self::CONST` does NOT resolve to the component inside a Blade view. Pass constants through the render() data array instead.
 
-Trap: #[Title] is compile-time only. For a title that depends on loaded data (phone name, article title), return view(...)->title(...) from render() instead.
+Head tags do not use #[Title] or view(...)->title(). Every page uses the SetsPageSeo trait and calls $this->seo($title, $description) as the first statement in render(); artesaos/seotools renders the result in layouts/app.blade.php. Pass the title without the site name — seotools appends it. See .ai/rules/seo.md for the ordering trap around structured data.

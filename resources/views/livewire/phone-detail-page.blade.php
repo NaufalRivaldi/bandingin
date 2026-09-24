@@ -40,7 +40,14 @@
                                         'border-line' => $thumb !== $index,
                                     ])
                                 >
-                                    <img src="{{ $image }}" alt="" loading="lazy" decoding="async" class="max-h-[84%] max-w-[84%] object-contain">
+                                    <img
+                                        src="{{ $image }}"
+                                        alt="Foto {{ $this->phone->name }} nomor {{ $index + 1 }}"
+                                        title="Foto {{ $this->phone->name }} nomor {{ $index + 1 }}"
+                                        loading="lazy"
+                                        decoding="async"
+                                        class="max-h-[84%] max-w-[84%] object-contain"
+                                    >
                                 </button>
                             @endforeach
                         </div>
@@ -139,19 +146,38 @@
     </section>
 
     <section id="harga" class="mx-auto max-w-[1140px] px-[clamp(16px,2.4vw,24px)] pt-[clamp(44px,5.6vw,80px)]">
-        <x-section-heading eyebrow="Harga hari ini" title="Daftar penjual">
-            <div class="flex flex-wrap gap-2">
-                @foreach ($this->variants as $index => $option)
-                    <x-chip
-                        wire:key="variant-{{ $option->id }}"
-                        :active="$variant === $index"
-                        wire:click="selectVariant({{ $index }})"
-                    >{{ $option->label }}</x-chip>
-                @endforeach
-            </div>
-        </x-section-heading>
+        <x-section-heading eyebrow="Harga hari ini" title="Daftar penjual" />
 
-        <div class="mt-[clamp(18px,2.4vw,26px)] overflow-hidden rounded-[22px] border border-line">
+        @if ($this->variants->isNotEmpty())
+            <div class="mt-[clamp(18px,2.4vw,26px)]">
+                <x-eyebrow>Harga resmi per varian</x-eyebrow>
+
+                <div class="mt-2.5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,150px),1fr))] gap-2.5">
+                    @foreach ($this->variants as $index => $option)
+                        <button
+                            type="button"
+                            wire:key="variant-{{ $option->id }}"
+                            wire:click="selectVariant({{ $index }})"
+                            aria-pressed="{{ $variant === $index ? 'true' : 'false' }}"
+                            @class([
+                                'cursor-pointer rounded-[14px] border bg-white px-3.5 py-3 text-left transition-[border-color,box-shadow] duration-200',
+                                'border-brand shadow-[0_0_0_3px_rgba(37,99,235,.12)]' => $variant === $index,
+                                'border-line hover:border-line-strong' => $variant !== $index,
+                            ])
+                        >
+                            <span class="block text-[12.5px] font-semibold text-muted">{{ $option->label }}</span>
+
+                            <span @class([
+                                'mt-1 block font-mono text-[15.5px] font-semibold tracking-[-.01em]',
+                                'text-brand' => $variant === $index,
+                            ])>{{ $option->formattedPrice() }}</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <div class="mt-[clamp(14px,1.8vw,20px)] overflow-hidden rounded-[22px] border border-line">
             @foreach ($this->sellers as $seller)
                 <x-seller-row wire:key="seller-{{ $seller->id }}" :seller="$seller" :cheapest="$loop->first" />
             @endforeach

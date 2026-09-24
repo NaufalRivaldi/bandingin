@@ -18,6 +18,7 @@
     <img
         src="{{ $src }}"
         alt="{{ $phone->name }}"
+        title="{{ $phone->name }}"
         loading="lazy"
         decoding="async"
         class="{{ $imageClass }}"

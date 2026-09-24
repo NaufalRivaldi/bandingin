@@ -73,7 +73,7 @@
                     </div>
 
                     <a
-                        href="{{ route('bandingkan') }}"
+                        href="{{ route('bandingkan', ['left' => $this->leftPhone->slug, 'right' => $this->rightPhone->slug]) }}"
                         class="mx-auto mt-4 block w-full max-w-[320px] rounded-[14px] bg-brand px-6 py-[17px] text-center font-sans text-base font-semibold text-white shadow-[0_12px_26px_rgba(37,99,235,.3)] transition-[background,transform] duration-200 hover:-translate-y-px hover:bg-brand-dark hover:text-white"
                     >
                         Bandingkan Sekarang
@@ -233,6 +233,7 @@
                         <img
                             src="{{ $featured->image_url }}"
                             alt="{{ $featured->title }}"
+                            title="{{ $featured->title }}"
                             referrerpolicy="no-referrer"
                             class="aspect-16/10 w-full overflow-hidden rounded-[22px] object-cover"
                         >
@@ -263,6 +264,7 @@
                             <img
                                 src="{{ $article->image_url }}"
                                 alt="{{ $article->title }}"
+                                title="{{ $article->title }}"
                                 loading="lazy"
                                 referrerpolicy="no-referrer"
                                 class="h-[58px] w-[76px] flex-none rounded-xl object-cover"

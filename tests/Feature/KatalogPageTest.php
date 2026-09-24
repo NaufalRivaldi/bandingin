@@ -3,16 +3,32 @@
 declare(strict_types=1);
 
 use App\Livewire\KatalogPage;
+use App\Models\Phone;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
     seedCatalog();
 });
 
+function render(Phone $phone): string
+{
+    return Blade::render('<x-phone-card :phone="$phone" />', ['phone' => $phone]);
+}
+
 it('lists the whole catalogue by default', function (): void {
     Livewire::test(KatalogPage::class)
         ->assertSee('12 HP ditemukan dari 12 total')
         ->assertSee('Redmi Note 14 Pro 5G');
+});
+
+it('hides the tag badge on phones that carry no tag', function (): void {
+    // bg-ink is the badge's marker class; nothing else in the card uses it.
+    $phone = Phone::with('brand')->first();
+
+    expect(render($phone->forceFill(['tag' => 'Terlaris'])))->toContain('bg-ink', 'Terlaris');
+    expect(render($phone->forceFill(['tag' => null])))->not->toContain('bg-ink');
+    expect(render($phone->forceFill(['tag' => ''])))->not->toContain('bg-ink');
 });
 
 it('narrows results by search term', function (): void {

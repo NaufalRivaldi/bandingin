@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Brand;
 use App\Money\Rupiah;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Merek HP di Indonesia — Bandingin.id')]
 class MerekPage extends Component
 {
+    use SetsPageSeo;
+
     #[Url]
     public string $brand = 'Xiaomi';
 
@@ -58,6 +59,8 @@ class MerekPage extends Component
 
     public function render(): View
     {
+        $this->seo('Merek HP di Indonesia', 'Daftar merek HP yang beredar di Indonesia beserta karakter, rentang harga, dan model andalannya masing-masing.');
+
         return view('livewire.merek-page');
     }
 

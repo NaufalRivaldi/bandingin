@@ -26,7 +26,7 @@ it('does not credit a source on our own article', function (): void {
     $this->get(route('berita.show', $article->slug))
         ->assertSuccessful()
         ->assertDontSee('Sumber:')
-        ->assertDontSee('rel="canonical"', escape: false);
+        ->assertSee('<link rel="canonical" href="'.e(route('berita.show', $article->slug)).'">', escape: false);
 });
 
 it('does not put our byline on someone elses article', function (): void {

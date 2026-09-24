@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Enums\ArticleCategory;
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Article;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Berita & Ulasan — Bandingin.id')]
 class BeritaPage extends Component
 {
+    use SetsPageSeo;
+
     public const string ALL_CATEGORIES = 'Semua';
 
     /** How many articles the grid adds per "Muat lebih banyak". */
@@ -89,7 +90,7 @@ class BeritaPage extends Component
     {
         $query = Article::published()->latest('published_at');
 
-        if (! $this->showsFeatured()) {
+        if ($this->category !== self::ALL_CATEGORIES) {
             return $query->where('category', $this->category);
         }
 
@@ -104,11 +105,23 @@ class BeritaPage extends Component
         return Article::published()->latest('published_at')->first();
     }
 
-    /** The featured hero only makes sense on the unfiltered list. */
+    /**
+     * The featured hero only makes sense on the unfiltered list, and only when
+     * there is an article to feature — an empty catalogue has none.
+     */
     #[Computed]
     public function showsFeatured(): bool
     {
-        return $this->category === self::ALL_CATEGORIES;
+        return $this->category === self::ALL_CATEGORIES && $this->featured() !== null;
+    }
+
+    /** Why the list is empty depends on whether a category filter is on. */
+    #[Computed]
+    public function emptyMessage(): string
+    {
+        return $this->category === self::ALL_CATEGORIES
+            ? 'Artikel terbaru akan muncul di sini begitu tersedia.'
+            : 'Belum ada artikel di kategori ini. Coba kategori lain.';
     }
 
     #[Computed]
@@ -119,6 +132,8 @@ class BeritaPage extends Component
 
     public function render(): View
     {
+        $this->seo('Berita & Ulasan', 'Berita peluncuran, ulasan, dan panduan beli HP di Indonesia. Dirangkum singkat supaya kamu cepat tahu yang penting.');
+
         return view('livewire.berita-page', [
             'categories' => [self::ALL_CATEGORIES, ...ArticleCategory::values()],
         ]);

@@ -16,3 +16,10 @@ NewsletterSubscribe renders twice on /berita (section + site-footer), so its inp
 The brand mark lives in components/site-logo.blade.php (inline SVG, fill-brand token) and is used by site-nav and site-footer. The matching favicons in public/ (favicon.svg, favicon.ico, apple-touch-icon.png) are generated from the same geometry — regenerate all of them together if the mark changes. The bare "VS" spans in home-page and perbandingan-page are duel separators, not the logo.
 
 Disqus is config-driven: config('services.disqus.shortname') via DISQUS_SHORTNAME. components/disqus-comments.blade.php renders nothing until it is set, and pushes its loader onto the 'scripts' stack that layouts/app.blade.php outputs after @livewireScripts.
+
+## Guard optional columns with filled(), never !== ''
+Most optional string columns on the models here are nullable, so `@if ($model->column !== '')` is true for NULL and renders an empty element. This shipped an empty black tag pill on every untagged phone card in the catalogue.
+
+Use `@if (filled($model->column))` for any nullable string you are deciding whether to render. `filled()` rejects null, '' and whitespace in one call.
+
+When a badge or pill has no text of its own to assert on, test it at the component level with `Blade::render('<x-phone-card :phone="$phone" />', [...])` and assert on the marker class (`bg-ink` for the tag badge) — that class is ambiguous on a full page, where the nav hamburger bars also use it.

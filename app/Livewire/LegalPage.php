@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsPageSeo;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('Legal — Bandingin.id')]
 class LegalPage extends Component
 {
+    use SetsPageSeo;
+
     #[Url(as: 'dok')]
     public string $document = 'privasi';
 
@@ -49,6 +50,8 @@ class LegalPage extends Component
 
     public function render(): View
     {
+        $this->seo('Legal', 'Ketentuan penggunaan, kebijakan privasi, dan pengungkapan afiliasi Bandingin.id.');
+
         return view('livewire.legal-page', [
             'labels' => self::LABELS,
             'effectiveFrom' => self::EFFECTIVE_FROM,

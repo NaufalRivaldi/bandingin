@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\SetsPageSeo;
 use App\Models\Phone;
 use App\Models\PhoneListing;
 use App\Models\PhoneVariant;
 use App\Money\Rupiah;
+use App\Seo\PhoneStructuredData;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
@@ -15,6 +17,8 @@ use Livewire\Component;
 
 class PhoneDetailPage extends Component
 {
+    use SetsPageSeo;
+
     /** Placeholder squares the design shows when a phone has no photos yet. */
     private const int PLACEHOLDER_THUMBNAIL_COUNT = 4;
 
@@ -56,11 +60,18 @@ class PhoneDetailPage extends Component
         return $this->phone()->variants;
     }
 
+    /** The variant the visitor is looking at, or null when the phone lists none. */
+    #[Computed]
+    public function selectedVariant(): ?PhoneVariant
+    {
+        return $this->variants()->get($this->variant);
+    }
+
     /** Official price of the variant the visitor is looking at. */
     #[Computed]
     public function variantPrice(): int
     {
-        return $this->variants()->get($this->variant)?->price ?? $this->phone()->price;
+        return $this->selectedVariant()?->price ?? $this->phone()->price;
     }
 
     #[Computed]
@@ -184,9 +195,18 @@ class PhoneDetailPage extends Component
 
     public function render(): View
     {
+        $phone = $this->phone();
+
+        $this->seo(
+            $phone->name.' — Spesifikasi & Harga',
+            'Spesifikasi lengkap, harga resmi, dan harga pasar '.$phone->name.'. Bandingkan chipset, layar, kamera, dan baterainya dengan HP lain.',
+        );
+
+        app(PhoneStructuredData::class)->handle($phone);
+
         return view('livewire.phone-detail-page', [
             'placeholderThumbnails' => range(0, self::PLACEHOLDER_THUMBNAIL_COUNT - 1),
-        ])->title($this->phone()->name.' — Spesifikasi & Harga | Bandingin.id');
+        ]);
     }
 
     /**
